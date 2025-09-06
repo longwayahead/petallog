@@ -20,11 +20,12 @@ import {createScannerPromise} from "../../../lib/scannerBridge";
 import CameraCaptureOverlay from "../components/CameraCaptureOverlay";
 import PhotoModal from "../components/Modals/PhotoModal";
 import PotFormModal from "../../pots/Modals/PotFormModal";
+import PlantFormModal from "../../plants/Modals/PlantFormModal";
 // import ChoosePotActionModal from "../../pots/Modals/chooseActionModal";
 import AssignPotModal from "../../pots/Modals/AssignPotModal";
 import ScanModal from "../../scanner/Modals/ScanModal";
 import {actionsApi, apiCreatePot} from "../../../lib/potService"; 
-import { resolvePotForm, resolveAssignPotCreate, resolveAssignPot, subscribePendingQr } from "../../../lib/potFormBridge";
+import { resolvePlantForm, subscribePendingPlant, resolvePotForm, resolveAssignPotCreate, resolveAssignPot, subscribePendingQr } from "../../../lib/potFormBridge";
 
 // simple debounce util
 function debounce<F extends (...args: any[]) => void>(fn: F, delay: number) {
@@ -174,7 +175,6 @@ const loadPlant = useCallback(async () => {
     if (plantId) loadPlant();
   }, [plantId]);
 
-
   //load tasks from api
   const loadTasks = useCallback(async () => {
   if (!plantId) return;
@@ -251,7 +251,7 @@ async function setProfilePhoto(plantId: string, photoId: string) {
 
 
 
-  // 🔹 Interaction editing helpers
+  // Interaction editing helpers
   const textareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
 const debouncedSync = useCallback( //live note update
   debounce(async (id: string, text: string) => {
@@ -421,6 +421,8 @@ const handleDeletePhoto = async (photoId: string) => {
 const [potFormOpen, setPotFormOpen] = useState(false);
 const [qrCode, setQrCode] = useState<string | null>(null);
 const [assignModalOpen, setAssignModalOpen] = useState(false);
+const [plantFormOpen, setPlantFormOpen] = useState(false);
+const [plantPotId, setPlantPotId] = useState<string | null>(null);
 
 
 useEffect(() => {
@@ -434,6 +436,15 @@ useEffect(() => {
     // console.log("PlantProfilePage notified of pending QR:", qr);
     setQrCode(qr);
     setAssignModalOpen(true);
+  });
+  return unsubscribe;
+}, []);
+
+useEffect(() => {
+  const unsubscribe = subscribePendingPlant((potId) => {
+    // console.log("PlantProfilePage notified of pending PlantFormModal for pot:", potId);
+    setPlantPotId(potId);
+    setPlantFormOpen(true);
   });
   return unsubscribe;
 }, []);
@@ -478,6 +489,7 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
               if (!handler) return;
 
               await handler(cfg, {
+                plant: plant,
                 plantId,
                 currentPotId: plant.potId,
                 addTimelineCard,
@@ -628,6 +640,20 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
           // console.log("Submitted pot form:", data);
           setPotFormOpen(false);
           setQrCode(null);
+        }}
+      />
+      <PlantFormModal
+        open={plantFormOpen}
+        potId={plantPotId || ""}
+        parentPlant={plant || undefined}
+        onClose={() => {
+          setPlantFormOpen(false);
+          setPlantPotId(null);
+        }}
+        onSubmit={(data) => {
+          resolvePlantForm?.(data);   // resolve back to actionController
+          setPlantFormOpen(false);
+          setPlantPotId(null);
         }}
       />
       <ScanModal

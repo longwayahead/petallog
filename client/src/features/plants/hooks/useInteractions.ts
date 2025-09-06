@@ -6,20 +6,6 @@ import { mapApiToInteraction } from "../../../lib/mappers";
 export function useInteractions(initial: Interaction[] = []) {
   const [items, setItems] = useState<Interaction[]>(initial);
 
-  // function mapApiToInteraction(api: ApiInteraction): Interaction {
-  //   return {
-  //     id: String(api.interactionID),
-  //     type: api.actionName,
-  //     title: api.actionNamePast,
-  //     badgeBg: api.actionBackground,
-  //     badgeIcon: api.actionIcon,
-  //     badgeColor: api.actionColour,
-  //     note: api.interactionNote ?? "",
-  //     when: api.createdAt,
-  //     photos: api.photos || [],
-  //   };
-  // }
-
   async function addTimelineCard(
     plantId: string,
     action: Action,

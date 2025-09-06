@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import type { Photo } from "../../../../types";
 import { fuzzyDate } from "../../../../utils/date";
 
@@ -14,9 +15,18 @@ export default function PhotoModal({
   onDelete?: (id: string) => void;
   onSetProfilePhoto?: (id: string) => void;
 }) {
+  const [loading, setLoading] = useState(true);
+
+  // Reset loading whenever a new photo is selected
+  useEffect(() => {
+    if (photo) {
+      setLoading(true);
+    }
+  }, [photo]);
+
   if (!photo) return null;
 
-  const isProfilePicture = currentProfilePicture == photo.thumbnail_url;
+  const isProfilePicture = currentProfilePicture === photo.thumbnail_url;
 
   return (
     <div className="photo-modal fixed inset-0 z-50 bg-black flex flex-col">
@@ -48,22 +58,42 @@ export default function PhotoModal({
 
         {/* Right: Close */}
         <div>
-          <button
-            className="text-white text-3xl"
-            onClick={onClose}
-          >
+          <button className="text-white text-3xl" onClick={onClose}>
             &times;
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden">
+      <div className="flex-1 flex items-center justify-center overflow-hidden relative bg-black">
+        {/* Thumbnail placeholder */}
+        {photo.thumbnail_url && (
+          <img
+            src={photo.thumbnail_url}
+            alt="thumbnail"
+            className={`absolute inset-0 w-full h-full object-contain blur-lg scale-105 transition-opacity duration-300 ${
+              loading ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        )}
+
+        {/* Full resolution image */}
         <img
           src={photo.url}
           alt="interaction photo"
-          className="max-h-full max-w-full object-contain"
+          className={`max-h-full max-w-full object-contain transition-opacity duration-500 ${
+            loading ? "opacity-0" : "opacity-100"
+          }`}
+          onLoad={() => setLoading(false)}
+          onError={() => setLoading(false)}
         />
+
+        {/* Spinner while full image is loading */}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <i className="fas fa-spinner fa-spin text-white text-3xl" />
+          </div>
+        )}
       </div>
 
       {/* Footer */}

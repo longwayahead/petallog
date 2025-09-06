@@ -11,6 +11,9 @@ export interface Plant {
   acquiredAt: string;
   acquiredFrom: string;
   plantNotes: string;
+  foodId: number | null;
+  foodName: string;
+  foodResetsWatering?: boolean;
   potId: string;
   potName: string;
   potLocation: string;
@@ -130,12 +133,9 @@ export interface ActionsApi {
   validateQRCode: (code: string) => Promise<ValidateQRCodeResult>;
   createPot: (data: CreatePot) => Promise<string>;
   createPlantPot: (plantId: string, potId: string) => Promise<void>;
-  createPropagation: (
-    parentId: string,
-    newPotId: string
-  ) => Promise<{ childId: string }>;
   apiAssignQRCodeToPot: (qrCode: string, potId: string) => Promise<void>;
   apiFreePot: (potId: string) => Promise<void>;
+  apiCreatePlant: (data: Partial<Plant> & {potId: string}) => Promise<Plant>;
 }
 
 export interface CreatePot {

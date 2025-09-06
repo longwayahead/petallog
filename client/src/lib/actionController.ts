@@ -1,15 +1,18 @@
 // src/lib/actionController.ts
 
-import type { Action, Interaction,  ActionsApi } from "../types";
+import type { Action, Interaction,  ActionsApi, Plant } from "../types";
 import {
   apiValidateQRCode,
   apiCreatePot,
   apiAssignPlantPot,
-  apiAssignQRCodeToPot
+  apiAssignQRCodeToPot,
+  apiCreatePlant,
+  apiUploadPhoto,
 } from "./potService";
-import { createPotFormPromise, createAssignPotPromise } from "./potFormBridge";
+import { createPotFormPromise, createAssignPotPromise, createPlantFormPromise } from "./potFormBridge";
 
 type Deps = {
+  plant: Plant;
   plantId: string;
   currentPotId: string;
   addTimelineCard: (
@@ -87,9 +90,64 @@ export async function newPot(currentPotId: string, openScanner: (heading?: strin
         return null;
       }
 
+      console.log(newPotId);
+
       return newPotId;
 
 
+}
+
+export async function newPlant(
+  plant: Plant,
+  potId: string,
+  addTimelineCard?: (plantId: string, action: Action, extras?: Partial<Interaction>) => Promise<void>,
+  action?: Action
+): Promise<any> {
+  console.log("Starting new plant flow");
+  const details = await createPlantFormPromise(potId);
+  console.log("Received plant details", details);
+
+  // 1. Create the child plant
+  const newPlant = await apiCreatePlant({ ...details, potId });
+
+  // 2. If the user supplied a photo
+  console.log("details", details);
+  console.log("newplant", newPlant);
+  if (details.photoFile && addTimelineCard && action) {
+      // 2a. Add a timeline card for the child plant
+      const res = await fetch(
+    `/api/interactions?plantId=${newPlant.plantId}&actionId=${action.actionID}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ note: `Propagated from parent "${plant.plantName}"` }),
+    }
+  );
+  if (!res.ok) throw new Error("Failed to create child interaction");
+const newInteraction = await res.json();
+
+ 
+
+    console.log("New interaction created", newInteraction.interactionID);
+
+    // 2b. Upload the photo to that new interaction
+
+    
+
+    console.log("Uploading photo to interaction", newInteraction.interactionID);
+    const uploadedPhoto = await apiUploadPhoto(details.photoFile, newInteraction.interactionID);
+
+    // 2c. Set that uploaded photo as the profile photo
+    await fetch(`/api/plants/${newPlant.plantId}/photo/${uploadedPhoto.id}`, {
+      method: "PATCH",
+    });
+
+    // Update return object
+    newPlant.plantPhoto = uploadedPhoto.url;
+  }
+
+  console.log("Created plant", newPlant);
+  return newPlant;
 }
 
 
@@ -105,7 +163,7 @@ export const actionHandlers: Record<
       action,
       { plantId, currentPotId, addTimelineCard, openScanner, navigateTo }
     ) => {
-
+      console.log("Starting repotting flow");
       const newPotId = await newPot( currentPotId, openScanner, navigateTo );
 
       const newPotPlant = await apiAssignPlantPot(plantId, newPotId ? newPotId : "");
@@ -120,20 +178,21 @@ export const actionHandlers: Record<
 
   prop: async (
     action,
-    { plantId, currentPotId, addTimelineCard, openScanner, api, navigateTo }
+    { plant, plantId, currentPotId, addTimelineCard, openScanner, navigateTo }
   ) => {
+    console.log("Starting propagation flow");
     const newPotId = await newPot( currentPotId, openScanner, navigateTo );
+    console.log("newPotId", newPotId);
+    if (!newPotId) return;
 
-    // const { childId } = await api.createPropagation(plantId, newPotId ? newPotId : "");
-    //make plant here
+    const newPlantDetails = await newPlant( plant, newPotId ? newPotId : "", addTimelineCard, action );
 
-    // await addTimelineCard(plantId, action, {
-    //   note: `Propagated into pot ${newPotId}`,
-    // });
-    // await addTimelineCard(childId, action, {
-    //   note: `Propagated from parent plant ${plantId}`,
-    // });
-    // navigateTo(`/plants/${childId}`);
+
+    await addTimelineCard(plantId, action, {
+      note: `Propagated as "${newPlantDetails.plantName}" into ${newPlantDetails.potName}`
+    });
+
+    navigateTo(`/plants/${newPlantDetails.plantId}`);
   },
 
   relo: async (action, { plantId, addTimelineCard, chooseLocation }) => {

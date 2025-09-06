@@ -88,3 +88,45 @@ export function resolveAssignPotCreate() {
   assignPotResolver = null;
   pendingQr = null;
 }
+
+
+/// plant form
+let plantFormResolver: ((data: any) => void) | null = null;
+let pendingPotId: string | null = null;
+let plantListeners: ((potId: string) => void)[] = [];
+
+/**
+ * Called by actionController to start a new plant flow.
+ * Notifies subscribers (PlantProfilePage) to open PlantFormModal.
+ */
+export function createPlantFormPromise(potId: string): Promise<any> {
+  console.log("Creating plant form promise for pot", potId);
+  pendingPotId = potId;
+  plantListeners.forEach(fn => fn(potId)); // notify UI
+  return new Promise((resolve) => {
+    console.log("Setting plant form resolver");
+    plantFormResolver = resolve;
+  });
+}
+
+/**
+ * Called from PlantProfilePage after user submits PlantFormModal.
+ */
+export function resolvePlantForm(data: any) {
+  if (plantFormResolver) {
+    plantFormResolver(data);
+    plantFormResolver = null;
+    pendingPotId = null;
+  }
+}
+
+/**
+ * Subscribe to pending plant requests.
+ * Returns an unsubscribe function.
+ */
+export function subscribePendingPlant(fn: (potId: string) => void) {
+  plantListeners.push(fn);
+  return () => {
+    plantListeners = plantListeners.filter(l => l !== fn);
+  };
+}

@@ -17,6 +17,9 @@ export async function findPlant(id) {
     p.acquired_at as acquiredAt,
     p.acquired_from as acquiredFrom,
     p.notes as plantNotes,
+    f.id as foodId,
+    f.name as foodName,
+    f.resets_watering as foodResetsWatering,
     t.id as potId,
     t.friendly_name as potName,
     t.location as potLocation,
@@ -25,6 +28,7 @@ export async function findPlant(id) {
     LEFT JOIN plants_pots pp on p.id = pp.plants_id AND pp.ended_at is null
     LEFT JOIN pots t on pp.pots_id = t.id
     LEFT JOIN photos o on o.id = p.photo_id
+    LEFT JOIN foods f on f.id = p.foods_id
     WHERE p.id = ?
     `, [id]);
   return rows[0];
@@ -87,48 +91,55 @@ export async function findCarePreferences(plantId) {
 
 
 export async function findInteractions(plantId) {
-  const [rows] = await pool.query(
-    `SELECT
-  i.id AS interactionID,
-  i.plant_id AS plantID,
-  i.action_id AS actionID,
-  a.name AS actionName,
-  a.name_past AS actionNamePast,
-  a.icon AS actionIcon,
-  a.colour AS actionColour,
-  a.background AS actionBackground,
-  i.note AS interactionNote,
-  i.created_at AS createdAt,
-  CONCAT(
-    '[',
-    GROUP_CONCAT(
-      JSON_OBJECT(
-        'id', p.id,
-        'url', p.url,
-        'thumbnail_url', p.thumbnail_url,
-        'created_at', p.created_at
-      )
-      ORDER BY p.created_at DESC
-    ),
-    ']'
-  ) AS photos
-FROM interactions i
-LEFT JOIN actions a ON a.id = i.action_id
-LEFT JOIN photos p ON p.interaction_id = i.id
-WHERE i.plant_id = ?
-  AND a.deleted = 0
-  AND i.deleted = 0
-GROUP BY i.id
-ORDER BY i.created_at DESC
-    `,
-    [plantId]
-  );
-  return rows.map(row => ({
-  ...row,
-  photos: row.photos
-    ? JSON.parse(row.photos).filter(p => p && p.id !== null)
-    : [],
-}));
+    const [rows] = await pool.query(
+      `SELECT
+    i.id AS interactionID,
+    i.plant_id AS plantID,
+    i.action_id AS actionID,
+    a.name AS actionName,
+    a.name_past AS actionNamePast,
+    a.icon AS actionIcon,
+    a.colour AS actionColour,
+    a.background AS actionBackground,
+    i.note AS interactionNote,
+    i.created_at AS createdAt,
+    CONCAT(
+      '[',
+      GROUP_CONCAT(
+        JSON_OBJECT(
+          'id', p.id,
+          'url', p.url,
+          'thumbnail_url', p.thumbnail_url,
+          'created_at', p.created_at
+        )
+        ORDER BY p.created_at DESC
+      ),
+      ']'
+    ) AS photos
+  FROM interactions i
+  LEFT JOIN actions a ON a.id = i.action_id
+  LEFT JOIN photos p ON p.interaction_id = i.id
+  WHERE i.plant_id = ?
+    AND a.deleted = 0
+    AND i.deleted = 0
+  GROUP BY i.id
+  ORDER BY i.created_at DESC
+      `,
+      [plantId]
+    );
+    return rows.map(row => ({
+    ...row,
+    photos: row.photos
+      ? JSON.parse(row.photos).filter(p => p && p.id !== null)
+      : [],
+  }));
+}
+export async function findMaxInteractionId(plantId) {
+    const [rows] = await pool.query(
+      `SELECT MAX(id) as interactionID FROM interactions WHERE plant_id = ?`,
+      [plantId]
+    );
+    return rows[0];
 }
 
 export async function setProfilePhoto(plantId, photoId) {
@@ -150,4 +161,37 @@ export async function assignPlantPot(plantId, potId) {
         return pot[0];
     }
     return null;
+}
+
+export async function createPlant({ plantName, species, acquiredAt, acquiredFrom, plantNotes, foodId, photoId, potId }) {
+  const conn = await pool.getConnection();
+  try{
+    await conn.beginTransaction();
+    console.log(plantName, species, acquiredAt, acquiredFrom, plantNotes, foodId, photoId, potId);
+
+    const plantRes = await conn.query(
+      `INSERT INTO plants (friendly_name, species, acquired_at, acquired_from, notes, foods_id, photo_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [plantName, species, acquiredAt || null, acquiredFrom || null, plantNotes || null, foodId, photoId || null]
+    );
+    const plantId = plantRes[0].insertId;
+
+    if(plantId && potId) {
+      await conn.query(
+        `INSERT INTO plants_pots (plants_id, pots_id) VALUES (?, ?)`,
+        [plantId, potId]
+      );
+      await conn.query(
+        `UPDATE pots SET status = 2 WHERE id = ?`,
+        [potId]
+      );
+    }
+    await conn.commit();
+    return await findPlant(plantId);
+  } catch (error) {
+    await conn.rollback();
+    throw error;
+  } finally {
+    conn.release();
+  }
 }

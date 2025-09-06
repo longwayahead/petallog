@@ -3,13 +3,11 @@ import RootLayout from './layouts/RootLayout';
 import TabLayout from './layouts/TabLayout';
 import NoNavLayout from './layouts/NoNavLayout';
 
-// Pages that exist in your tree
 import FeedPage from '../features/feed/pages/FeedPage';
 import PlantsPage from '../features/search/pages/PlantsPage';
 import NotificationsPage from '../features/tasks/pages/NotificationsPage';
 import SettingsPage from '../features/settings/pages/SettingsPage';
 import ScanPage from '../features/scanner/pages/ScanPage';
-import SwipeablePanels from '../features/plants/pages/test'
 
 // Plant profile detail
 import PlantProfilePage from '../features/plants/pages/PlantProfilePage';
@@ -36,7 +34,6 @@ export const router = createBrowserRouter([
         element: <NoNavLayout />,
         children: [
           { path: 'scan', element: <ScanPage /> },
-          { path: 'test', element: <SwipeablePanels /> },
         ],
       },
 

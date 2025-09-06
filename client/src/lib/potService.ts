@@ -1,5 +1,5 @@
 // src/lib/potService.ts
-import type { ActionsApi, ValidateQRCodeResult, CreatePot, Plant } from "../types";
+import type { ActionsApi, ValidateQRCodeResult, CreatePot, Plant, Photo } from "../types";
 
 export async function apiValidateQRCode(code: string): Promise<ValidateQRCodeResult> {
   const res = await fetch(`/api/qr/${code}`);
@@ -26,18 +26,6 @@ export async function apiCreatePlantPot(plantId: string, potId: string): Promise
   });
 }
 
-export async function apiCreatePropagation(
-  parentId: string,
-  newPotId: string
-): Promise<{ childId: string }> {
-  const res = await fetch(`/api/propagations`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ parentId, newPotId }),
-  });
-  if (!res.ok) throw new Error("Failed to create propagation");
-  return res.json();
-}
 
 export async function apiAssignQRCodeToPot(qrCode: string, potId: string): Promise<void> {
   const res = await fetch(`/api/pots/assign-qr`, {
@@ -65,6 +53,36 @@ export async function apiAssignPlantPot(plantId: string, potId: string): Promise
   return res.json();
 }
 
+export async function apiCreatePlant(data: Partial<Plant> & {potId: string}): Promise<Plant> {
+  console.log("apiCreatePlant called with", data);
+  const res = await fetch(`/api/plants`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to create plant");
+  return res.json();
+}
+
+export async function apiUploadPhoto(file: File, interactionId: string): Promise<Photo> {
+  const form = new FormData();
+  console.log("Uploading photo to interaction", interactionId);
+  form.append("photos", file);
+
+  const res = await fetch(`/api/interactions/${interactionId}/photos`, {
+    method: "POST",
+    body: form,
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to upload photo");
+  }
+
+  const photos: Photo[] = await res.json();
+  return photos[0]; // backend can return multiple, we only care about the first
+}
+
+
 
 
 
@@ -72,7 +90,7 @@ export const actionsApi: ActionsApi = {
   validateQRCode: apiValidateQRCode,
   createPot: apiCreatePot,
   createPlantPot: apiCreatePlantPot,
-  createPropagation: apiCreatePropagation,
   apiAssignQRCodeToPot: apiAssignQRCodeToPot,
   apiFreePot: apiFreePot,
+  apiCreatePlant: apiCreatePlant,
 };

@@ -46,6 +46,15 @@ export async function getInteractions(req, res, next) {
   }
 }
 
+export async function getMaxInteractionid(req, res, next) {
+    try {
+      const maxId = await Plants.findMaxInteractionId(req.params.id);
+      res.json(maxId);
+    } catch (err) {
+      next(err);
+    }
+}
+
 export const setProfilePhoto = async(req,res,next) => {
     try{
         const photo = await Plants.setProfilePhoto(req.params.plantId, req.params.photoId);
@@ -73,4 +82,24 @@ export async function assignPlantPot(req, res, next) {
     } catch (error) {
         next(error);
     }
+}
+
+export async function addPlant(req, res, next) {
+  try {
+    const { plantName, species, acquiredAt, acquiredFrom, plantNotes, foodId, photoId, potId} = req.body;
+
+    const newPlant = await Plants.createPlant({
+      plantName,
+      species,
+      acquiredAt,
+      acquiredFrom,
+      plantNotes,
+      foodId,
+      photoId,
+      potId,
+    });
+    res.status(201).json(newPlant);
+  } catch (err) {
+    next(err);
+  }
 }
