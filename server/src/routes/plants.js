@@ -10,6 +10,7 @@ router.get("/:id/preferences", plantsController.getCarePreferences); // GET /api
 router.get("/:id/interactions", plantsController.getInteractions); // GET /api/plants/:id/interactions
 router.get("/:id/interactions/max", plantsController.getMaxInteractionid);
 router.patch("/:plantId/photo/:photoId", plantsController.setProfilePhoto); // PATCH /api/plants/:plantId/photo/:photoId
+router.patch("/:plantId/kill", plantsController.killPlant); // PATCH /api/plants/:plantId/kill
 router.post("/:plantId/pot", plantsController.assignPlantPot); // POST /api/plants/:plantId/pots
 router.post("/", plantsController.addPlant);        // POST /api/plants
 

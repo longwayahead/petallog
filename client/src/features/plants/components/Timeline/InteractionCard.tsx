@@ -15,6 +15,7 @@ export default function InteractionCard({
   onCardClick,
   onDoneEditing,
   onSelectPhoto,
+  plant,
 }: InteractionCardProps) {
   const [swipeEnabled, setSwipeEnabled] = useState(false);
   const [pressing, setPressing] = useState(false);
@@ -45,7 +46,7 @@ export default function InteractionCard({
 
     let timer: ReturnType<typeof setTimeout> | null = null;
 
-    if (!editing) {
+    if (!editing && plant?.plantAlive) { //only allow long press if plant is alive.
       const start = (e: PointerEvent) => {
         e.preventDefault();
         setPressing(true);

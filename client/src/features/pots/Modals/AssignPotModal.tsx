@@ -53,7 +53,7 @@ export default function AssignPotModal({ open, qrCode, onClose, onAssign, onCrea
               onClick={() => onAssign(pot.potsId)}
             >
               <div className="font-medium">{pot.potFriendlyName}</div>
-              <div className="text-xs text-gray-500">{pot.potLocation}</div>
+              {/* <div className="text-xs text-gray-500">{pot.potLocation}</div> */}
             </li>
           ))}
         </ul>

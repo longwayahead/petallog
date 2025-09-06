@@ -4,7 +4,7 @@ import TimelineList from "./Timeline/TimelineList";
 import GalleryGrid from "./GalleryGrid";
 import { useTabs } from "../../../hooks/useTabs";
 import { usePagerSwipe } from "../../../hooks/swipe/usePageSwipe";
-import type { Interaction, Photo } from "../../../types";
+import type { Interaction, Photo, Plant } from "../../../types";
 
 interface PlantTabsProps {
   items: Interaction[];
@@ -27,6 +27,7 @@ interface PlantTabsProps {
   plantId: string;
   onSelectPhoto: (photo: Photo) => void;
   refreshGallery: number;
+  plant: Plant | null;
 }
 
 export default function PlantTabs({
@@ -49,6 +50,7 @@ export default function PlantTabs({
   indicatorRef,
   show,
   containerRef,
+  plant,
 }: PlantTabsProps) {
 
   const refs = [timelineRef, galleryRef];
@@ -93,6 +95,7 @@ export default function PlantTabs({
                 onCardClick={onCardClick}
                 onDoneEditing={onDoneEditing}
                 onSelectPhoto={onSelectPhoto}
+                plant={plant ? plant : null}
               />
             </div>
           </div>

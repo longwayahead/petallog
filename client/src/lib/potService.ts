@@ -37,9 +37,15 @@ export async function apiAssignQRCodeToPot(qrCode: string, potId: string): Promi
   return res.json();
 }
 
-export async function apiFreePot(potId: string): Promise<void> {
+export async function apiFreePot(potId: string): Promise<any> {
   const res = await fetch(`/api/pots/${potId}/free`, { method: "POST" });
   if (!res.ok) throw new Error("Failed to free pot");
+  return res.json();
+}
+
+export async function apiKillPlant(plantId: string): Promise<any> {
+  const res = await fetch(`/api/plants/${plantId}/kill`, { method: "PATCH" });
+  if (!res.ok) throw new Error("Failed to kill plant");
   return res.json();
 }
 
@@ -93,4 +99,5 @@ export const actionsApi: ActionsApi = {
   apiAssignQRCodeToPot: apiAssignQRCodeToPot,
   apiFreePot: apiFreePot,
   apiCreatePlant: apiCreatePlant,
+  apiKillPlant: apiKillPlant,
 };

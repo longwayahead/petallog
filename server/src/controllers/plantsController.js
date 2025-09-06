@@ -67,6 +67,19 @@ export const setProfilePhoto = async(req,res,next) => {
     }
 }
 
+export const killPlant = async(req,res,next) => {
+    try{
+        const killed = await Plants.killPlant(req.params.plantId);
+        if (killed) {
+          res.status(200).json({ message: "Plant killed successfully" });
+        } else {
+          res.status(404).json({ message: "Plant not found" });
+        }
+    } catch (err) {
+        next(err);
+    }
+}
+
 export async function assignPlantPot(req, res, next) {
     try{
         const plantId = req.params.plantId;

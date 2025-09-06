@@ -1,6 +1,6 @@
 // src/features/plants/components/Timeline/TimelineList.tsx
 import InteractionCard from './InteractionCard';
-import type { Interaction, Photo } from '../../../../types';
+import type { Interaction, Photo, Plant } from '../../../../types';
 
 export default function TimelineList({
   items,
@@ -13,6 +13,7 @@ export default function TimelineList({
   onCardClick,
   onDoneEditing,
   onSelectPhoto,
+  plant,
 }: {
   items: Interaction[];
   editingId: string | null;
@@ -24,6 +25,7 @@ export default function TimelineList({
   onCardClick: (id: string) => void;
   onDoneEditing: () => void;
   onSelectPhoto: (p: Photo) => void;
+  plant: Plant | null;
 }) {
   return (
     <>
@@ -41,6 +43,7 @@ export default function TimelineList({
           onSelectPhoto={(p) => onSelectPhoto(p)}
           onCardClick={() => {onCardClick(item.id)}}
           onDoneEditing={() => onDoneEditing()}
+          plant={plant ? plant : null}
         />
       ))}
     </>

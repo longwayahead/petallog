@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { Photo } from "../../../../types";
+import type { Photo, Plant } from "../../../../types";
 import { fuzzyDate } from "../../../../utils/date";
 
 export default function PhotoModal({
@@ -8,12 +8,14 @@ export default function PhotoModal({
   onClose,
   onDelete,
   onSetProfilePhoto,
+  plant,
 }: {
   photo: Photo | null;
   currentProfilePicture?: string | null;
   onClose: () => void;
   onDelete?: (id: string) => void;
   onSetProfilePhoto?: (id: string) => void;
+  plant: Plant | null;
 }) {
   const [loading, setLoading] = useState(true);
 
@@ -33,16 +35,18 @@ export default function PhotoModal({
       {/* Top bar */}
       <div className="absolute top-4 left-0 right-0 flex justify-between items-center px-4 z-50">
         {/* Left: Delete */}
-        <div>
-          {onDelete && (
-            <button
-              className="bg-red-600 p-2 rounded"
+        {Boolean(plant?.plantAlive) && (
+          <div>
+            {onDelete && (
+              <button
+                className="bg-red-600 p-2 rounded"
               onClick={() => onDelete(photo.id)}
             >
               <i className="fas fa-trash text-white" />
             </button>
           )}
         </div>
+        )}
 
         {/* Center: Set profile */}
         <div>

@@ -50,6 +50,7 @@ export default function ScanModal({ open, heading = "Scan a pot", onClose }: Sca
             }}
             onError={(err) => console.error("Scanner error", err)}
             constraints={{ facingMode: "environment" }}
+            sound={false}
           />
         </div>
 

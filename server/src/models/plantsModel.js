@@ -1,11 +1,30 @@
 import pool from "../config/db.js";
 
 export async function findAllPlants() {
-  const [rows] = await pool.query(`SELECT * 
-    p.*,
-    o.url as plantPhoto
+  const [rows] = await pool.query(`
+    SELECT
+    p.id as plantId,
+    p.friendly_name as plantName,
+    p.species,
+    p.acquired_at as acquiredAt,
+    p.acquired_from as acquiredFrom,
+    p.notes as plantNotes,
+    p.alive as plantAlive,
+    p.died_at as diedAt,
+    f.id as foodId,
+    f.name as foodName,
+    f.resets_watering as foodResetsWatering,
+    t.id as potId,
+    t.friendly_name as potName,
+    t.location as potLocation,
+    o.thumbnail_url as plantPhoto
     FROM plants p
-    LEFT JOIN photos o on o.id = p.photo_id`);
+    LEFT JOIN plants_pots pp on p.id = pp.plants_id AND pp.ended_at is null
+    LEFT JOIN pots t on pp.pots_id = t.id
+    LEFT JOIN photos o on o.id = p.photo_id
+    LEFT JOIN foods f on f.id = p.foods_id
+    ORDER BY p.alive DESC, p.friendly_name ASC
+    `);
   return rows;
 }
 
@@ -17,6 +36,8 @@ export async function findPlant(id) {
     p.acquired_at as acquiredAt,
     p.acquired_from as acquiredFrom,
     p.notes as plantNotes,
+    p.alive as plantAlive,
+    p.died_at as diedAt,
     f.id as foodId,
     f.name as foodName,
     f.resets_watering as foodResetsWatering,
@@ -150,13 +171,21 @@ export async function setProfilePhoto(plantId, photoId) {
   return result.affectedRows > 0;
 }
 
+export async function killPlant(plantId) {
+  const [result] = await pool.query(
+    "UPDATE plants SET alive = 0, died_at = NOW() WHERE id = ?",
+    [plantId]
+  );
+  return result.affectedRows > 0;
+}
+
 export async function assignPlantPot(plantId, potId) {
-    await pool.query(`UPDATE plants_pots SET ended_at = NOW() WHERE plants_id = ? AND ended_at IS NULL`, [plantId]); 
+    // await pool.query(`UPDATE plants_pots SET ended_at = NOW() WHERE plants_id = ? AND ended_at IS NULL`, [plantId]); 
 
     const assign = await pool.query(`INSERT INTO plants_pots (plants_id, pots_id) VALUES (?, ?)`, [plantId, potId]);
     const newRowId = assign[0].insertId;
     if(assign[0].affectedRows > 0) {
-        const pot = await pool.query(`UPDATE pots SET status = 2 WHERE id = ?`, [potId]);
+        const pot = await pool.query(`UPDATE pots SET status = 2 WHERE id = ?`, [potId]); //set status to occupied
         console.log(pot);
         return pot[0];
     }

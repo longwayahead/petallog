@@ -51,7 +51,7 @@ export default function PotFormModal({ open, qrCode, onClose, onSubmit }: Props)
           className="space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium">Name</label>
+            <label className="block text-sm font-medium">Name*</label>
             <input
               className="w-full border rounded p-2"
               value={form.friendly_name}
@@ -60,7 +60,7 @@ export default function PotFormModal({ open, qrCode, onClose, onSubmit }: Props)
             />
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium">Location</label>
             <input
               className="w-full border rounded p-2"
@@ -68,7 +68,7 @@ export default function PotFormModal({ open, qrCode, onClose, onSubmit }: Props)
               onChange={(e) => setForm({ ...form, location: e.target.value })}
               required
             />
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-2 gap-2">
             <div>

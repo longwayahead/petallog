@@ -11,6 +11,8 @@ export interface Plant {
   acquiredAt: string;
   acquiredFrom: string;
   plantNotes: string;
+  plantAlive: boolean;
+  diedAt?: string | null;
   foodId: number | null;
   foodName: string;
   foodResetsWatering?: boolean;
@@ -74,6 +76,7 @@ export interface InteractionCardProps {
   onCardClick: () => void;
   onDoneEditing?: () => void;
   onSelectPhoto: (p: Photo) => void;
+  plant: Plant | null;
 }
 
 export interface Preference {
@@ -98,7 +101,7 @@ export interface Action {
   actionName: string;
   actionNamePast: string;
   actionDescription: string | null;
-  actionFlow: 'note' | 'repo' | 'prop' | 'relo';
+  actionFlow: 'note' | 'repo' | 'prop' | 'kill';
   actionBackground: string;
   actionIcon: string;
   actionColour: string;
@@ -136,6 +139,7 @@ export interface ActionsApi {
   apiAssignQRCodeToPot: (qrCode: string, potId: string) => Promise<void>;
   apiFreePot: (potId: string) => Promise<void>;
   apiCreatePlant: (data: Partial<Plant> & {potId: string}) => Promise<Plant>;
+  apiKillPlant: (plantId: string) => Promise<void>;
 }
 
 export interface CreatePot {

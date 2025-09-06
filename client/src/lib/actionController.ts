@@ -8,6 +8,8 @@ import {
   apiAssignQRCodeToPot,
   apiCreatePlant,
   apiUploadPhoto,
+  apiFreePot,
+  apiKillPlant,
 } from "./potService";
 import { createPotFormPromise, createAssignPotPromise, createPlantFormPromise } from "./potFormBridge";
 
@@ -60,7 +62,17 @@ export async function newPot(currentPotId: string, openScanner: (heading?: strin
         console.log("actionController got assign result", result);
         // result can be either a potId (number/string) OR a signal to create a new pot
 
-        if (typeof result === "number" || typeof result === "string") {
+        console.log("Assign pot result", result);
+
+        if (result === "create") {
+          console.log("User chose to create a new pot");
+          const details = await createPotFormPromise(qrCode);
+          console.log("actionController received details", details);
+
+          const newPot = await apiCreatePot(details);
+          console.log("Created pot", newPot);
+          newPotId = String(newPot);
+        } else if (typeof result === "number" || typeof result === "string") {
           
           console.log("Assigned existing pot", result);
 
@@ -69,15 +81,7 @@ export async function newPot(currentPotId: string, openScanner: (heading?: strin
           //bind qrCode → potId (insert into qrcodes_pots)
           await apiAssignQRCodeToPot(qrCode, String(result));
 
-        } else if (result === "create") {
-          console.log("User chose to create a new pot");
-          const details = await createPotFormPromise(qrCode);
-          console.log("actionController received details", details);
-
-          const newPot = await apiCreatePot(details);
-          console.log("Created pot", newPot);
-          newPotId = String(newPot);
-        }
+        } 
       } else { //qr already assigned to pot
         newPotId = String(qr.potId);
         console.log(qrCode, qr);
@@ -166,6 +170,8 @@ export const actionHandlers: Record<
       console.log("Starting repotting flow");
       const newPotId = await newPot( currentPotId, openScanner, navigateTo );
 
+
+      await apiFreePot(currentPotId);
       const newPotPlant = await apiAssignPlantPot(plantId, newPotId ? newPotId : "");
       // console.log("Assigned plant to pot", newPotPlant);
 
@@ -187,19 +193,30 @@ export const actionHandlers: Record<
 
     const newPlantDetails = await newPlant( plant, newPotId ? newPotId : "", addTimelineCard, action );
 
+    if(!newPlantDetails) return;
 
+    //add a card onto the parent
     await addTimelineCard(plantId, action, {
-      note: `Propagated as "${newPlantDetails.plantName}" into ${newPlantDetails.potName}`
+      note: `Propagated into ${newPlantDetails.potName} as "${newPlantDetails.plantName}"`
     });
 
     navigateTo(`/plants/${newPlantDetails.plantId}`);
   },
 
-  relo: async (action, { plantId, addTimelineCard, chooseLocation }) => {
-    const newLocationId = await chooseLocation();
-    await addTimelineCard(plantId, action, {
-      note: `Moved to location ${newLocationId}`,
+  kill: async (action, {plant, addTimelineCard}) => {
+
+    const freePot = await apiFreePot(plant.potId);
+    console.log("Freed pot", freePot);
+    
+    if (!freePot) return;
+
+    const setPlantDead = apiKillPlant(plant.plantId);
+
+    if (!setPlantDead) return;
+
+    await addTimelineCard(plant.plantId, action, {
+      note: `bleh 💀`,
     });
-  },
+  }
 
 };

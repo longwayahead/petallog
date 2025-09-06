@@ -476,7 +476,7 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
           {!loading && !error && plant && <PlantSummary plant={plant} />}
 
           {pendingTasks.length > 0 && <PendingTaskBanner tasks={pendingTasks} />}
-
+          {plant?.plantAlive == true && (
           <QuickActions
             actions={actions}
             onAdd={async (actionId: number) => {
@@ -493,17 +493,6 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
                 plantId,
                 currentPotId: plant.potId,
                 addTimelineCard,
-                // openScanner: async (heading?: string) => {
-                //   const promise = createScannerPromise();
-                //   navigate("/scan", {
-                //     state: {
-                //       mode: "flow",
-                //       heading: heading || "Scan a pot",
-                //       returnTo: `/plants/${plantId}`,
-                //     },
-                //   });
-                //   return promise;
-                // },
                 openScanner: async (heading?: string) => {
                   const promise = createScannerPromise();
                   setScannerOpen(true);
@@ -520,7 +509,7 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
               
             }}
           />
-
+          )}
 
           <PlantInfo
             open={infoOpen}
@@ -555,6 +544,7 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
           plantId={plantId ?? ""}
           onSelectPhoto={setSelectedPhoto}
           refreshGallery={refreshGallery}
+          plant={plant ? plant : null}
           //#
 
         />
@@ -586,24 +576,8 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
           }
           setSelectedPhoto(null);
         }}
+        plant={plant || null}
       />
-      {/* <ChoosePotActionModal
-        open={chooseModalOpen}
-        onClose={() => setChooseModalOpen(false)}
-        onChoose={(choice) => {
-          resolveChoosePotAction(choice);
-          setChooseModalOpen(false);
-          if (choice === "create") {
-            console.log("Create new - opening pot form");
-            setPotFormOpen(true); // open create form next
-          }
-          if (choice === "assign") {
-            // open your assign-to-existing modal here
-            console.log("Assign existing");
-            setAssignModalOpen(true);
-          }
-        }}
-      /> */}
 
       <AssignPotModal
         open={assignModalOpen}
