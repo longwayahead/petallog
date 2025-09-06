@@ -37,7 +37,7 @@ export default function GalleryGrid({ plantId, refreshKey, onSelect }: GalleryGr
       {photos.map((p) => (
         <img
           key={p.id}
-          src={p.url}
+          src={p.thumbnail_url || p.url}
           className="w-full aspect-square object-cover cursor-pointer"
           onClick={() => onSelect(p)}
         />
