@@ -13,7 +13,7 @@
       badgeColor: api.actionColour,
       note: api.interactionNote ?? "",
       when: api.createdAt, // or relative time
-      photos: [], // unless you support them from API
-      
+      photos: api.photos || [], // unless you support them from API
+
     };
   }

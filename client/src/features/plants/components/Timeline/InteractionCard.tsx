@@ -208,7 +208,7 @@ export default function InteractionCard({
                   </div>
                 ) : (
                   <img
-                    src={p.thumbnail_url || p.url}
+                    src={p.thumbnail_url}
                     className="w-full aspect-square object-cover rounded cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();

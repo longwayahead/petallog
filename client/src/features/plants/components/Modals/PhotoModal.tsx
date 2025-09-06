@@ -3,16 +3,20 @@ import { fuzzyDate } from "../../../../utils/date";
 
 export default function PhotoModal({
   photo,
+  currentProfilePicture,
   onClose,
   onDelete,
   onSetProfilePhoto,
 }: {
   photo: Photo | null;
+  currentProfilePicture?: string | null;
   onClose: () => void;
   onDelete?: (id: string) => void;
   onSetProfilePhoto?: (id: string) => void;
 }) {
   if (!photo) return null;
+
+  const isProfilePicture = currentProfilePicture == photo.thumbnail_url;
 
   return (
     <div className="photo-modal fixed inset-0 z-50 bg-black flex flex-col">
@@ -32,7 +36,7 @@ export default function PhotoModal({
 
         {/* Center: Set profile */}
         <div>
-          {onSetProfilePhoto && (
+          {onSetProfilePhoto && !isProfilePicture && (
             <button
               className="bg-yellow-500 p-2 rounded"
               onClick={() => onSetProfilePhoto(photo.id)}

@@ -203,7 +203,7 @@ useEffect(() => {
       const data: ApiInteraction[] = await res.json();
       // console.log("Loaded interactions:", data);
       const mappedItems = data.map(mapApiToInteraction);
-      console.log("Mapped interactions:", mappedItems);
+      // console.log("Mapped interactions:", mappedItems);
       setItems(mappedItems);
     } catch (err) {
       console.error("Failed to load interactions", err);
@@ -565,6 +565,7 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
       {cameraFor && <CameraCaptureOverlay onCapture={handleCapture} onCancel={() => setCameraFor(null)} />}
       <PhotoModal
         photo={selectedPhoto}
+        currentProfilePicture={plant?.plantPhoto || null}
         onClose={() => setSelectedPhoto(null)}
         onDelete={handleDeletePhoto}
         onSetProfilePhoto={(photoId: string) => {

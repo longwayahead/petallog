@@ -20,7 +20,7 @@ export async function findPlant(id) {
     t.id as potId,
     t.friendly_name as potName,
     t.location as potLocation,
-    o.url as plantPhoto
+    o.thumbnail_url as plantPhoto
     FROM plants p
     LEFT JOIN plants_pots pp on p.id = pp.plants_id AND pp.ended_at is null
     LEFT JOIN pots t on pp.pots_id = t.id
@@ -105,6 +105,7 @@ export async function findInteractions(plantId) {
       JSON_OBJECT(
         'id', p.id,
         'url', p.url,
+        'thumbnail_url', p.thumbnail_url,
         'created_at', p.created_at
       )
       ORDER BY p.created_at DESC
