@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import type { InteractionCardProps } from "../../../../types";
 import { useCardSwipe } from "../../../../hooks/swipe/useCardSwipe";
 import { useHaptics } from "../../../../hooks/useHaptics";
+import { fuzzyDate } from "../../../../utils/date";
 
 export default function InteractionCard({
   data,
@@ -150,7 +151,7 @@ export default function InteractionCard({
           {/* Header */}
           <div className="flex justify-between items-center">
             <span className="font-medium">{data.title}</span>
-            <span className="text-sm text-gray-500">{data.when}</span>
+            <span className="text-sm text-gray-500">{fuzzyDate(data.when)}</span>
           </div>
 
           {/* Note */}
@@ -207,7 +208,7 @@ export default function InteractionCard({
                   </div>
                 ) : (
                   <img
-                    src={p.url}
+                    src={p.thumbnail_url || p.url}
                     className="w-full aspect-square object-cover rounded cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();

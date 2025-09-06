@@ -123,6 +123,7 @@ export function useSwipe({
         clamped = Math.max(Math.min(clamped, max), -max);
         dxRef.current = clamped; // 🔹 only update ref
         dyRef.current = 0;
+        console.log("[useSwipe] moveX:", clamped);
       } else {
         let clamped = deltaY;
         if (!allowDown && clamped > 0) clamped = 0;
@@ -130,6 +131,7 @@ export function useSwipe({
         clamped = Math.max(Math.min(clamped, max), -max);
         dyRef.current = clamped;
         dxRef.current = 0;
+        console.log("[useSwipe] moveY:", clamped);
       }
     },
     [axis, max, allowLeft, allowRight, allowUp, allowDown, enabled, startThreshold, lockRatio, claimOnLock, priority]
@@ -145,12 +147,14 @@ export function useSwipe({
 
       if (locked === "x" && activePriority.current === priority) {
         const finalDx = dxRef.current;
+        console.log("[useSwipe] releaseX:", finalDx);
         if (finalDx > minCommit && allowRight) onCommitRight?.();
         else if (finalDx < -minCommit && allowLeft) onCommitLeft?.();
 
         onRelease?.(finalDx, 0);
       } else if (locked === "y" && activePriority.current === priority) {
         const finalDy = dyRef.current;
+        console.log("[useSwipe] releaseY:", finalDy);
         if (finalDy > minCommit && allowDown) onCommitDown?.();
         else if (finalDy < -minCommit && allowUp) onCommitUp?.();
 
@@ -158,6 +162,7 @@ export function useSwipe({
       }
 
       reset();
+      console.log("[useSwipe] reset");
     },
     [enabled, minCommit, allowLeft, allowRight, allowUp, allowDown, onCommitLeft, onCommitRight, onCommitUp, onCommitDown, onRelease, priority]
   );

@@ -39,8 +39,8 @@ export async function getCarePreferences(req, res, next) {
 
 export async function getInteractions(req, res, next) {
   try {
-    const preferences = await Plants.findInteractions(req.params.id);
-    res.json(preferences);
+    const interactions = await Plants.findInteractions(req.params.id);
+    res.json(interactions);
   } catch (err) {
     next(err);
   }

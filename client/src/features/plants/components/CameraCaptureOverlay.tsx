@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import Webcam from "react-webcam";
 
 interface Props {
-  onCapture: (file: File, previewUrl: string) => void;
+  onCapture: (file: File, previewUrl: string, thumbUrl?:string) => void;
   onCancel: () => void;
 }
 
@@ -56,8 +56,8 @@ export default function CameraCaptureOverlay({ onCapture, onCancel }: Props) {
       const track = (video.srcObject as MediaStream)
         ?.getVideoTracks?.()[0];
       const settings = track?.getSettings();
-      const width = settings?.width || video.videoWidth;
-      const height = settings?.height || video.videoHeight;
+      const width = video.videoWidth;
+      const height = video.videoHeight;
 
       // Draw frame to canvas
       const canvas = document.createElement("canvas");
@@ -67,21 +67,44 @@ export default function CameraCaptureOverlay({ onCapture, onCancel }: Props) {
       if (ctx) {
         ctx.drawImage(video, 0, 0, width, height);
 
-        const blob = await new Promise<Blob | null>((resolve) =>
+        const fullBlob = await new Promise<Blob | null>((resolve) =>
           canvas.toBlob(resolve, "image/jpeg", 1)
         );
-        if (blob) {
-          const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
-          const previewUrl = URL.createObjectURL(blob);
-          onCapture(file, previewUrl);
+        if (!fullBlob) {
+          return;
+          
         }
+        const fullFile = new File([fullBlob], "capture.jpg", { type: "image/jpeg" });
+        const previewUrl = URL.createObjectURL(fullBlob);
+
+        //now make the thumbnail
+        const thumbWidth = 120;
+        const thumbHeight = Math.round((thumbWidth / width) * height);
+
+        const thumbCanvas = document.createElement("canvas");
+        thumbCanvas.width = thumbWidth;
+        thumbCanvas.height = thumbHeight;
+        const thumbCtx = thumbCanvas.getContext("2d");
+        thumbCtx?.drawImage(video, 0, 0, thumbWidth, thumbHeight);
+
+        const thumbBlob = await new Promise<Blob | null>((resolve) =>
+          thumbCanvas.toBlob(resolve, "image/jpeg", 0.7)
+      );
+
+      let thumbUrl: string | null = null;
+      if (thumbBlob) {
+        thumbUrl = URL.createObjectURL(thumbBlob);
+        // Note: we don't actually use the thumbnail file for now, but could upload it if needed
+      }
+
+        onCapture(fullFile, previewUrl, thumbUrl || previewUrl);
+
+        onCancel();
+
       }
     } catch (err) {
       console.error("Error capturing photo:", err);
-    } 
-    // finally {
-    //   setTimeout(() => setCapturing(false), 500); // smooth UX
-    // }
+    }
   };
 
   const handleSwitchCamera = () => {

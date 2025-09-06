@@ -1,28 +1,24 @@
 // src/hooks/useInteractions.ts
 import { useState } from "react";
 import type { ApiInteraction, Interaction, Action } from "../../../types";
-import { formatDistanceToNow } from "date-fns";
-
-function fuzzyDate(dateString: string) {
-  return formatDistanceToNow(new Date(dateString), { addSuffix: true });
-}
+import { mapApiToInteraction } from "../../../lib/mappers";
 
 export function useInteractions(initial: Interaction[] = []) {
   const [items, setItems] = useState<Interaction[]>(initial);
 
-  function mapApiToInteraction(api: ApiInteraction): Interaction {
-    return {
-      id: String(api.interactionID),
-      type: api.actionName,
-      title: api.actionNamePast,
-      badgeBg: api.actionBackground,
-      badgeIcon: api.actionIcon,
-      badgeColor: api.actionColour,
-      note: api.interactionNote ?? "",
-      when: fuzzyDate(api.createdAt),
-      photos: api.photos || [],
-    };
-  }
+  // function mapApiToInteraction(api: ApiInteraction): Interaction {
+  //   return {
+  //     id: String(api.interactionID),
+  //     type: api.actionName,
+  //     title: api.actionNamePast,
+  //     badgeBg: api.actionBackground,
+  //     badgeIcon: api.actionIcon,
+  //     badgeColor: api.actionColour,
+  //     note: api.interactionNote ?? "",
+  //     when: api.createdAt,
+  //     photos: api.photos || [],
+  //   };
+  // }
 
   async function addTimelineCard(
     plantId: string,
@@ -32,7 +28,8 @@ export function useInteractions(initial: Interaction[] = []) {
     // console.log("Adding timeline card", action, extras);
     const tempId =
       Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-
+    const now = new Date();
+    const createdAt = new Date(now.getTime() - 5000);
     const newItem: Interaction = {
       id: tempId,
       type: action.actionName,
@@ -40,7 +37,7 @@ export function useInteractions(initial: Interaction[] = []) {
       badgeBg: action.actionBackground,
       badgeIcon: action.actionIcon,
       badgeColor: action.actionColour,
-      when: "less than a minute ago",
+      when: createdAt.toISOString(),
       photos: [],
       ...extras,
     };

@@ -1,6 +1,4 @@
   
-  
-  import { fuzzyDate } from "./date.ts";
   import type { ApiInteraction } from "../types.ts";
   import type { Interaction } from "../types.ts";
   
@@ -14,7 +12,8 @@
       badgeIcon: api.actionIcon,
       badgeColor: api.actionColour,
       note: api.interactionNote ?? "",
-      when: fuzzyDate(api.createdAt), // or relative time
+      when: api.createdAt, // or relative time
       photos: [], // unless you support them from API
+      
     };
   }

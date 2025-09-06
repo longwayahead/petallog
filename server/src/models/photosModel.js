@@ -1,11 +1,11 @@
 import pool from "../config/db.js";
 
-export async function insertPhoto(interactionId, url) {
+export async function insertPhoto(interactionId, url, thumbnailUrl) {
   const query = `
-    INSERT INTO photos (interaction_id, url)
-    VALUES (?, ?)
+    INSERT INTO photos (interaction_id, url, thumbnail_url)
+    VALUES (?, ?, ?)
   `;
-  const [result] = await pool.query(query, [interactionId, url]);
+  const [result] = await pool.query(query, [interactionId, url, thumbnailUrl]);
 
   // result.insertId gives the new primary key
   const [rows] = await pool.query("SELECT * FROM photos WHERE id = ?", [result.insertId]);

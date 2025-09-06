@@ -1,14 +1,13 @@
 // src/lib/actionController.ts
 
-import type { Action, Interaction,  ActionsApi, CreatePot } from "../types";
+import type { Action, Interaction,  ActionsApi } from "../types";
 import {
   apiValidateQRCode,
   apiCreatePot,
   apiAssignPlantPot,
-  apiFreePot,
   apiAssignQRCodeToPot
 } from "./potService";
-import { createPotFormPromise, createChoosePotActionPromise, createAssignPotPromise } from "./potFormBridge";
+import { createPotFormPromise, createAssignPotPromise } from "./potFormBridge";
 
 type Deps = {
   plantId: string;
@@ -25,43 +24,26 @@ type Deps = {
   api: ActionsApi;
 };
 
+export async function newPot(currentPotId: string, openScanner: (heading?: string) => Promise<string | null>, navigateTo: (path: string) => void): Promise<string | null> {
 
-
-export const actionHandlers: Record<
-  Action["actionFlow"],
-  (a: Action, d: Deps) => Promise<void>
-> = {
-  note: async (action, { plantId, addTimelineCard }) => {
-    await addTimelineCard(plantId, action);
-  },
-
-    repo: async (
-//       actionController calls createPotFormPromise.
-//        That sets a pending QR + resolver in the bridge.
-//         When /scan navigates back, PlantProfilePage sees getPendingQr(), opens the modal.
-//        On submit, resolvePotForm(data) fires → resolves the promise → logs in actionController.
-
-
-
-      action,
-      { plantId, currentPotId, addTimelineCard, openScanner, navigateTo }
-    ) => {
-      // 1. Scan QR code
+// 1. Scan QR code
       const qrCode = await openScanner("Scan the destination pot");
+
+      if (!qrCode) return null;
 
       // 2. Validate QR code
       const qr = await apiValidateQRCode(qrCode);
       console.log("QR result:", qr);
 
       if (!qr.valid) {
-        alert("This QR code doesn’t exist.");
-        return;
+        alert("This QR code doesn't exist.");
+        return null;
       }
 
       if (qr.plantId) {
         // pot already has a plant
         navigateTo(`/plants/${qr.plantId}`);
-        return;
+        return null;
       }
 
       let newPotId: string | null = null;
@@ -98,41 +80,60 @@ export const actionHandlers: Record<
         console.log(qrCode, qr);
         console.log("QR already assigned to pot", newPotId);
       }
+      console.log(currentPotId, newPotId);
+
+      if (String(currentPotId) === String(newPotId)) {
+        alert("This plant is already in that pot. Try scanning a different pot.");
+        return null;
+      }
+
+      return newPotId;
+
+
+}
+
+
+export const actionHandlers: Record<
+  Action["actionFlow"],
+  (a: Action, d: Deps) => Promise<void>
+> = {
+  note: async (action, { plantId, addTimelineCard }) => {
+    await addTimelineCard(plantId, action);
+  },
+
+    repo: async (
+      action,
+      { plantId, currentPotId, addTimelineCard, openScanner, navigateTo }
+    ) => {
+
+      const newPotId = await newPot( currentPotId, openScanner, navigateTo );
 
       const newPotPlant = await apiAssignPlantPot(plantId, newPotId ? newPotId : "");
-      console.log("Assigned plant to pot", newPotPlant);
+      // console.log("Assigned plant to pot", newPotPlant);
 
- 
-      // Free up old pot
-      // console.log("Freeing old pot", currentPotId);
-      // const freePot = await apiFreePot(currentPotId);
-
-      // if (freePot !== undefined) {
-        await addTimelineCard(plantId, action, {
-          note: `Repotted into ${newPotPlant.potName}`,
-        });
-        // }
-      
-      
-
-      
+      await addTimelineCard(plantId, action, {
+        note: `Repotted into ${newPotPlant.potName}`,
+      });
 
     },
 
 
   prop: async (
     action,
-    { plantId, addTimelineCard, openScanner, api, navigateTo }
+    { plantId, currentPotId, addTimelineCard, openScanner, api, navigateTo }
   ) => {
-    const newPotId = await openScanner();
-    const { childId } = await api.createPropagation(plantId, newPotId);
-    await addTimelineCard(plantId, action, {
-      note: `Propagated into pot ${newPotId}`,
-    });
-    await addTimelineCard(childId, action, {
-      note: `Propagated from parent plant ${plantId}`,
-    });
-    navigateTo(`/plants/${childId}`);
+    const newPotId = await newPot( currentPotId, openScanner, navigateTo );
+
+    // const { childId } = await api.createPropagation(plantId, newPotId ? newPotId : "");
+    //make plant here
+
+    // await addTimelineCard(plantId, action, {
+    //   note: `Propagated into pot ${newPotId}`,
+    // });
+    // await addTimelineCard(childId, action, {
+    //   note: `Propagated from parent plant ${plantId}`,
+    // });
+    // navigateTo(`/plants/${childId}`);
   },
 
   relo: async (action, { plantId, addTimelineCard, chooseLocation }) => {
@@ -142,10 +143,4 @@ export const actionHandlers: Record<
     });
   },
 
-  // phot: async (action, { plantId, addTimelineCard, openCamera }) => {
-  //   const photoUrls = await openCamera();
-  //   await addTimelineCard(plantId, action, {
-  //     photos: photoUrls.map((url, i) => ({ id: String(i), url })),
-  //   });
-  // },
 };

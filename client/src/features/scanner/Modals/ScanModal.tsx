@@ -18,8 +18,8 @@ export default function ScanModal({ open, heading = "Scan a pot", onClose }: Sca
     setLoading(true);
     setError(null);
 
-    resolveScanner(result); // ✅ fulfills the promise back in actionController
-    onClose();              // ✅ close modal
+    resolveScanner(result);
+    onClose();
     setLoading(false);
   }
 
@@ -27,8 +27,18 @@ export default function ScanModal({ open, heading = "Scan a pot", onClose }: Sca
 
   return (
     <div className="fixed inset-0 bg-black/80 flex flex-col z-50">
-      <header className="px-4 h-[56px] flex items-center text-white">
+      <header className="px-4 h-[56px] flex items-center justify-between text-white">
         <h1 className="text-lg font-semibold">{heading}</h1>
+
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="p-2 rounded-full hover:bg-white/20"
+          aria-label="Close"
+        >
+          <i className="fa fa-times text-xl"></i>
+        </button>
       </header>
 
       <div className="flex-1 p-4">

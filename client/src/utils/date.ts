@@ -3,5 +3,6 @@ import { formatDistanceToNow } from "date-fns";
 
 export function fuzzyDate(dateString: string): string {
   const d = new Date(dateString);
-  return formatDistanceToNow(new Date(d.getTime() - 1000), { addSuffix: true });
+  // console.log("fuzzyDate input:", dateString, "parsed:", d);
+  return formatDistanceToNow(new Date(d.getTime() - 5000), { addSuffix: true });
 }

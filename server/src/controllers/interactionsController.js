@@ -1,5 +1,6 @@
 import * as Interactions from "../models/interactionsModel.js";
 import * as Tasks from "../models/tasksModel.js";
+import { getPhotosByInteraction } from "../models/photosModel.js";
 
 export async function addInteraction(req, res, next) {
     try{
@@ -62,11 +63,16 @@ export async function deleteInteraction(req, res) {
     try {
         const { id } = req.params;
 
+        const photos = await getPhotosByInteraction(id);
+        if (photos.length > 0) {
+            return res.status(400).json({ message: "Cannot delete interaction with photos" });
+        }
+
         const result = await Interactions.deleteInteraction(id);
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: "Interaction not found" });
         }
-        res.json({ message: "Interaction deleted" });
+        res.status(204).json({ message: "Interaction deleted" });
     } catch (err) {
         res.status(500).json({ message: "Server error", error: err.message });
     }

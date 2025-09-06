@@ -106,6 +106,7 @@ export interface Action {
 export interface Photo {
   id: string;
   url: string;
+  thumbnail_url?: string;
   created_at: string;
   interaction_id: string;
   pending?: boolean;

@@ -202,7 +202,9 @@ useEffect(() => {
       if (!res.ok) throw new Error("Failed to fetch interactions");
       const data: ApiInteraction[] = await res.json();
       // console.log("Loaded interactions:", data);
-      setItems(data.map(mapApiToInteraction));
+      const mappedItems = data.map(mapApiToInteraction);
+      console.log("Mapped interactions:", mappedItems);
+      setItems(mappedItems);
     } catch (err) {
       console.error("Failed to load interactions", err);
       setItems([]); // fall back empty
@@ -277,7 +279,16 @@ const updateNote = (id: string, text: string) => {
   debouncedSync(id, text);
 };
 
-  const requestDelete = (id: string) => setConfirmDeleteId(id);
+  const requestDelete = (id: string) => {
+    const interaction = items.find(it => it.id === id);
+    if (!interaction) return;
+    if (interaction.photos.length > 0) {
+      alert("Cannot delete interaction with photos.");
+      return;
+    } 
+    setConfirmDeleteId(id);
+  };
+
   const confirmDelete = async () => {
     if (!confirmDeleteId) return;
 
@@ -305,13 +316,14 @@ const onAddPhoto = (id: string) => {
 };
 
 const [refreshGallery, setRefreshGallery] = useState(0);
-const handleCapture = async (file: File, previewUrl: string) => {
+const handleCapture = async (file: File, previewUrl: string, thumbUrl?:string) => {
   if (!cameraFor) return;
 
   //create temporary photo
   const tempPhoto: Photo = {
     id: `temp-${Date.now()}`,
     url: "",
+    thumbnail_url: thumbUrl || "",
     created_at: new Date().toISOString(),
     interaction_id: cameraFor,
     pending: true,
@@ -339,9 +351,12 @@ const handleCapture = async (file: File, previewUrl: string) => {
           it.id === cameraFor 
           ? { 
             ...it,
-            photos: it.photos.map(p =>
-              p.pending ? newPhotos[0] : p
-            ), //replace temp with real          
+            photos: [
+              ...newPhotos,
+              ...it.photos.filter(p => !p.pending) //keep existing non-pending photos
+            ].filter((p, idx, arr) =>
+            arr.findIndex(pp => pp.id === p.id) === idx
+            ), //deduplicate
           }
         : it
         )
@@ -376,6 +391,33 @@ const handleCapture = async (file: File, previewUrl: string) => {
   setCameraFor(null);
 };
 
+const handleDeletePhoto = async (photoId: string) => {
+  if (!photoId) return;
+  // console.log("Deleting photo", photoId);
+  
+  //optimistically remove the photo
+  const backup = items;
+  setItems(items =>
+    items.map(it => ({
+      ...it,
+      photos: it.photos.filter(p => p.id !== photoId),
+    }))
+  );
+  setSelectedPhoto(null);
+  //actually delete on server
+  try{
+    const res = await fetch(`/api/photos/${photoId}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error("Failed to delete photo");
+  } catch (err) {
+    console.error(err);
+    setItems(backup); // rollback
+  } finally {
+    setSelectedPhoto(null);
+  }
+}
+
 const [potFormOpen, setPotFormOpen] = useState(false);
 const [qrCode, setQrCode] = useState<string | null>(null);
 const [assignModalOpen, setAssignModalOpen] = useState(false);
@@ -389,7 +431,7 @@ useEffect(() => {
 // modal, which resolves the original promise back in actionController, continuing the flow.
 
   const unsubscribe = subscribePendingQr((qr) => {
-    console.log("PlantProfilePage notified of pending QR:", qr);
+    // console.log("PlantProfilePage notified of pending QR:", qr);
     setQrCode(qr);
     setAssignModalOpen(true);
   });
@@ -524,10 +566,7 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
       <PhotoModal
         photo={selectedPhoto}
         onClose={() => setSelectedPhoto(null)}
-        onDelete={(id) => {
-          // handle deletion logic
-          setSelectedPhoto(null);
-        }}
+        onDelete={handleDeletePhoto}
         onSetProfilePhoto={(photoId: string) => {
           if (plant?.plantId && photoId) {
             setProfilePhoto(plant.plantId, photoId);
@@ -558,12 +597,12 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
         qrCode={qrCode || ""}
         onClose={() => setAssignModalOpen(false)}
         onAssign={(potId) => {
-          console.log("User assigned existing pot", potId);
+          // console.log("User assigned existing pot", potId);
           resolveAssignPot(potId);
           setAssignModalOpen(false);
         }}
         onCreateNew={() => {
-          console.log("User chose to create new pot from AssignPotModal");
+          // console.log("User chose to create new pot from AssignPotModal");
           resolveAssignPotCreate();
           setAssignModalOpen(false);
           setPotFormOpen(true);
@@ -582,10 +621,10 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
         }}
         onSubmit={(data) => {
         
-            console.log("promise resolving", data);
+            // console.log("promise resolving", data);
           resolvePotForm?.(data); // just pass details back up
          
-          console.log("Submitted pot form:", data);
+          // console.log("Submitted pot form:", data);
           setPotFormOpen(false);
           setQrCode(null);
         }}

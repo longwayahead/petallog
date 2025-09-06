@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { UPLOADS_DIR } from "../middleware/upload.js";
+import sharp from "sharp";
 import {
   insertPhoto,
   getPhotosByInteraction,
@@ -17,7 +18,20 @@ export const uploadPhotos = async (req, res, next) => {
 
     for (const f of files) {
       const url = `/uploads/${f.filename}`;
-      const photo = await insertPhoto(id, url);
+
+      //generate thumbnail filename
+      const thumbName = `thumb_${f.filename}`;
+      const thumbPath = path.join(UPLOADS_DIR, thumbName);
+      const thumbnailUrl = `/uploads/${thumbName}`;
+
+      //generate thumbnail
+      await sharp(f.path)
+        .resize(200, 200, {fit: "cover"})
+        .jpeg({ quality: 80 })
+        .toFile(thumbPath);
+
+
+      const photo = await insertPhoto(id, url, thumbnailUrl);
       saved.push(photo);
     }
 
@@ -55,6 +69,16 @@ export const deletePhoto = async (req, res, next) => {
       fs.unlinkSync(filePath);
     } catch (e) {
       console.warn("File not found on disk:", filePath);
+    }
+
+    //delete thumbnail
+    if (photo.thumbnail_url) {
+      const thumbPath = path.join(UPLOADS_DIR, path.basename(photo.thumbnail_url));
+      try {
+        fs.unlinkSync(thumbPath);
+      } catch (e) {
+        console.warn("Thumbnail not found on disk:", thumbPath);
+      }
     }
 
     await deletePhotoDb(req.params.id);
