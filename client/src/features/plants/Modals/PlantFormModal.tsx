@@ -44,6 +44,7 @@ export default function PlantFormModal({
   });
 //   console.log("parent plant", parentPlant);
 
+console.log(parentPlant);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -81,6 +82,8 @@ export default function PlantFormModal({
   const isRequired = (field: keyof Plant | "photoFile" | "foodId") =>
     requiredFields.includes(field);
 
+  if (!open) return null;
+  if (parentPlant === undefined) return null;
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-h-[90vh] overflow-y-auto">

@@ -1,8 +1,11 @@
-import { Link, NavLink } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useTasks } from "../context/TaskContext";
 
 export default function BottomNav() {
   const { pendingCount } = useTasks();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const cls = (isActive: boolean) =>
     `p-2 ${isActive ? "text-emerald-600" : "text-gray-500"}`;
 
@@ -16,14 +19,17 @@ export default function BottomNav() {
         <i className="fas fa-seedling text-xl" />
       </NavLink>
 
-      <Link
-        to="/scan"
+      {/* Scanner button → use navigate with state */}
+      <button
+        onClick={() =>
+          navigate("/scan", { state: { returnTo: location.pathname } })
+        }
         className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-full w-14 h-14 -mt-7 flex items-center justify-center shadow-md"
       >
         <i className="fas fa-camera text-xl" />
-      </Link>
+      </button>
 
-      <NavLink to="/notifications" className={({ isActive }) => cls(isActive)}>
+      <NavLink to="/tasks" className={({ isActive }) => cls(isActive)}>
         <span className="relative inline-flex">
           <i className="fa-solid fa-bell text-xl" />
           {pendingCount > 0 && (

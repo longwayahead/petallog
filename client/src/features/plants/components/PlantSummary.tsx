@@ -16,7 +16,7 @@ export default function PlantSummary({ plant }: { plant: Plant }) {
       <div className="flex-1">
         <h2 className="text-2xl font-bold">{plant.plantName}</h2>
         <p className="text-gray-600">
-          <i>{plant.species}</i> {Boolean(plant.plantAlive) ? `• ${plant.potName}` : ""} 
+          <i>{plant.species}</i>
         </p>
         <div className="flex mt-2 space-x-3 text-sm text-gray-500">
           <div className="flex items-center">
@@ -29,12 +29,19 @@ export default function PlantSummary({ plant }: { plant: Plant }) {
             </span>
           </div>
           <div className="flex items-center">
+            <span>
             {!plant.plantAlive ? ( // show skull + diedAt when NOT alive
               <>
-                <i className="fas fa-skull-crossbones mr-1" />
+                <i className="fas fa-skull mr-1" />
                 {diedAt}
               </>
-            ) : ""}
+            ) : (<>
+             
+                <i className="fas fa-home mr-1" />
+                {plant.potName}
+             
+            </>) }
+            </span>
           </div>
 
         </div>

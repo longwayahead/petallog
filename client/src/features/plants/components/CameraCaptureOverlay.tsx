@@ -32,17 +32,13 @@ export default function CameraCaptureOverlay({ onCapture, onCancel }: Props) {
     loadDevices();
   }, []);
 
-  const videoConstraints: MediaTrackConstraints = devices.length
-  ? {
-      deviceId: { exact: devices[currentIndex].deviceId },
-      width: { ideal: 1920 },   // request up to 2.5K
-      height: { ideal: 1080 },
-    }
-  : {
-      facingMode: "environment",
-      width: { ideal: 1920 },
-      height: { ideal: 1080 },
-    };
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
+
+  const videoConstraints: MediaTrackConstraints = {
+    facingMode: facingMode,
+    width: { ideal: 1920 },
+    height: { ideal: 1080 },
+  };
 
   const handleCapture = async () => {
     if (capturing) return;
@@ -94,7 +90,6 @@ export default function CameraCaptureOverlay({ onCapture, onCancel }: Props) {
       let thumbUrl: string | null = null;
       if (thumbBlob) {
         thumbUrl = URL.createObjectURL(thumbBlob);
-        // Note: we don't actually use the thumbnail file for now, but could upload it if needed
       }
 
         onCapture(fullFile, previewUrl, thumbUrl || previewUrl);
@@ -108,9 +103,10 @@ export default function CameraCaptureOverlay({ onCapture, onCancel }: Props) {
   };
 
   const handleSwitchCamera = () => {
-    if (devices.length > 1) {
-      setCurrentIndex((prev) => (prev + 1) % devices.length);
-    }
+    // if (devices.length > 1) {
+    //   setCurrentIndex((prev) => (prev + 1) % devices.length);
+    // }
+    setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
   };
 
   return (

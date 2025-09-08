@@ -4,6 +4,8 @@ export async function checkQr(req, res, next) {
   try {
     const { code } = req.params;
 
+    
+
     // check QR exists
     const qr = await QrModel.findQrByCode(code);
     if (!qr) {
@@ -18,7 +20,7 @@ export async function checkQr(req, res, next) {
 
     
     // check active plant instance
-    const plantInPot = await QrModel.findPlantByPot(pot.id);
+    const plantInPot = await QrModel.findPlantByPot(pot.pots_id);
 
     if (plantInPot) {  
       return res.json({

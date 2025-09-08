@@ -9,7 +9,8 @@ import { actionHandlers } from "../../../lib/actionController";
 
 
 
-import Header from "../components/Header";
+// import Header from "../components/Header";
+import PageHeader from "../../../ui/TopNav";
 import QuickActions from "../components/QuickActions";
 import ConfirmDeleteModal from "../components/Modals/ConfirmDeleteModal";
 import PlantSummary from "../components/PlantSummary";
@@ -23,7 +24,8 @@ import PotFormModal from "../../pots/Modals/PotFormModal";
 import PlantFormModal from "../../plants/Modals/PlantFormModal";
 // import ChoosePotActionModal from "../../pots/Modals/chooseActionModal";
 import AssignPotModal from "../../pots/Modals/AssignPotModal";
-import ScanModal from "../../scanner/Modals/ScanModal";
+// import ScanModal from "../../scanner/Modals/ScanModal";
+import ScanScreen from "../../scanner/pages/ScanScreen";
 import {actionsApi, apiCreatePot} from "../../../lib/potService"; 
 import { resolvePlantForm, subscribePendingPlant, resolvePotForm, resolveAssignPotCreate, resolveAssignPot, subscribePendingQr } from "../../../lib/potFormBridge";
 
@@ -57,12 +59,19 @@ export default function PlantProfilePage() {
   const contentAreaRef = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ca = contentAreaRef.current!;
-    const onScroll = () => setCollapsed(ca.scrollTop > 60);
-    ca.addEventListener("scroll", onScroll);
-    return () => ca.removeEventListener("scroll", onScroll);
-  }, []);
+useEffect(() => {
+  // console.log("Setting up scroll listener");
+  const ca = contentAreaRef.current;
+  if (!ca) return;
+//   console.log("contentAreaRef.current:", ca);
+// console.log("is scrollable?", ca.scrollHeight, ca.clientHeight);
+  const onScroll = () => {
+  setCollapsed(ca.scrollTop > 60); // e.g. 100px scroll
+};
+
+  ca.addEventListener("scroll", onScroll);
+  return () => ca.removeEventListener("scroll", onScroll);
+}, [loading]); //rerun after page loaded
 
 
 
@@ -393,7 +402,7 @@ const handleCapture = async (file: File, previewUrl: string, thumbUrl?:string) =
 
 const handleDeletePhoto = async (photoId: string) => {
   if (!photoId) return;
-  // console.log("Deleting photo", photoId);
+  console.log("Deleting photo", photoId);
   
   //optimistically remove the photo
   const backup = items;
@@ -425,29 +434,29 @@ const [plantFormOpen, setPlantFormOpen] = useState(false);
 const [plantPotId, setPlantPotId] = useState<string | null>(null);
 
 
-useEffect(() => {
-// The potFormBridge.ts file acts like a shared event bus between actionController and PlantProfilePage.
-// When actionController needs user input (e.g. create/assign pot), it calls create*Promise(),
-// which stores the pending QR and notifies subscribers. PlantProfilePage subscribes to these
-// events and opens the appropriate modal. Once the user submits, resolve*() is called in the
-// modal, which resolves the original promise back in actionController, continuing the flow.
+// useEffect(() => {
+// // The potFormBridge.ts file acts like a shared event bus between actionController and PlantProfilePage.
+// // When actionController needs user input (e.g. create/assign pot), it calls create*Promise(),
+// // which stores the pending QR and notifies subscribers. PlantProfilePage subscribes to these
+// // events and opens the appropriate modal. Once the user submits, resolve*() is called in the
+// // modal, which resolves the original promise back in actionController, continuing the flow.
 
-  const unsubscribe = subscribePendingQr((qr) => {
-    // console.log("PlantProfilePage notified of pending QR:", qr);
-    setQrCode(qr);
-    setAssignModalOpen(true);
-  });
-  return unsubscribe;
-}, []);
+//   const unsubscribe = subscribePendingQr((qr) => {
+//     // console.log("PlantProfilePage notified of pending QR:", qr);
+//     setQrCode(qr);
+//     setAssignModalOpen(true);
+//   });
+//   return unsubscribe;
+// }, []);
 
-useEffect(() => {
-  const unsubscribe = subscribePendingPlant((potId) => {
-    // console.log("PlantProfilePage notified of pending PlantFormModal for pot:", potId);
-    setPlantPotId(potId);
-    setPlantFormOpen(true);
-  });
-  return unsubscribe;
-}, []);
+// useEffect(() => {
+//   const unsubscribe = subscribePendingPlant((potId) => {
+//     // console.log("PlantProfilePage notified of pending PlantFormModal for pot:", potId);
+//     setPlantPotId(potId);
+//     setPlantFormOpen(true);
+//   });
+//   return unsubscribe;
+// }, []);
 
 
 
@@ -460,95 +469,119 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
 
   return (
     <div className="mx-auto max-w-md bg-white text-gray-800">
-      <Header collapsed={collapsed} plant={plant}/>
+      <PageHeader
+        title="Plant Profile"
+        collapsed={collapsed}
+        plant={
+          plant && {
+            plantName: plant.plantName,
+            species: plant.species,
+            potName: plant.potName,
+            plantPhoto: plant.plantPhoto,
+          }
+        }
+        menuItems={[
+          { label: "Edit Plant", onClick: () => setPlantFormOpen(true) },
+          { label: "Delete Plant", onClick: () => setConfirmDeleteId(plant?.plantId.toString() ?? null) },
+        ]}
+      />
 
-      {/* Scrollable content */}
-      <div
-        ref={contentAreaRef}
-        className="
-    content-area overflow-y-auto h-[calc(100vh-60px)]
-    pb-0 sm:pb-[calc(56px+env(safe-area-inset-bottom,0px))]
-  "
-      >
-        <div className="p-4"
-        ref={topRef}
+      {loading ? (
+<div className="flex items-center justify-center h-[calc(100vh-60px-56px)]">
+    <div className="h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+  </div>
+  ) : (
+    <>
+
+        {/* Scrollable content */}
+        <div
+          ref={contentAreaRef}
+          className="
+      content-area overflow-y-auto h-[calc(100vh-60px)]
+      pb-0 sm:pb-[calc(56px+env(safe-area-inset-bottom,0px))]
+    "
         >
-          {!loading && !error && plant && <PlantSummary plant={plant} />}
+          <div className="p-4"
+          ref={topRef}
+          >
+            {!loading && !error && plant && <PlantSummary plant={plant} />}
 
-          {pendingTasks.length > 0 && <PendingTaskBanner tasks={pendingTasks} />}
-          {plant?.plantAlive == true && (
-          <QuickActions
-            actions={actions}
-            onAdd={async (actionId: number) => {
-              if (!plantId || !plant?.potId) return;
+            {pendingTasks.length > 0 && <PendingTaskBanner tasks={pendingTasks} />}
+            {plant?.plantAlive == true && (
+            <QuickActions
+              actions={actions}
+              onAdd={async (actionId: number) => {
+                if (!plantId || !plant?.potId) return;
 
-              const cfg = actions.find((a) => a.actionID === actionId);
-              if (!cfg) return;
+                const cfg = actions.find((a) => a.actionID === actionId);
+                if (!cfg) return;
 
-              const handler = actionHandlers[cfg.actionFlow]; //connect to actionController
-              if (!handler) return;
+                const handler = actionHandlers[cfg.actionFlow]; //connect to actionController
+                if (!handler) return;
 
-              await handler(cfg, {
-                plant: plant,
-                plantId,
-                currentPotId: plant.potId,
-                addTimelineCard,
-                openScanner: async (heading?: string) => {
-                  const promise = createScannerPromise();
-                  setScannerOpen(true);
-                  setScannerHeading(heading || "Scan a pot");
-                  return promise;
-                },
-                openCamera: async () => ["/photos/example.jpg"],
-                chooseLocation: async () => "location-123",
-                navigateTo: (path) => navigate(path),
-                api: actionsApi, // 👈 now comes from potService
-              });
-              await loadPlant();
-              await loadTasks();
+                await handler(cfg, {
+                  plant: plant,
+                  plantId,
+                  currentPotId: plant.potId,
+                  addTimelineCard,
+                  openScanner: async (heading?: string) => {
+                    const promise = createScannerPromise();
+                    setScannerOpen(true);
+                    setScannerHeading(heading || "Scan a pot");
+                    return promise;
+                  },
+                  openCamera: async () => ["/photos/example.jpg"],
+                  chooseLocation: async () => "location-123",
+                  navigateTo: (path) => navigate(path),
+                  api: actionsApi, // 👈 now comes from potService
+                });
+                await loadPlant();
+                await loadTasks();
+                
+              }}
+            />
+            )}
+
+            <PlantInfo
+              open={infoOpen}
+              onToggle={() => setInfoOpen((o) => !o)}
+              preferences={preferences}
+              notes={plant?.plantNotes || ""}
               
-            }}
-          />
-          )}
+            />
+          </div>
 
-          <PlantInfo
-            open={infoOpen}
-            onToggle={() => setInfoOpen((o) => !o)}
-            preferences={preferences}
-            notes={plant?.plantNotes || ""}
-            
+          {/* Tabs */}
+          <PlantTabs
+            items={items}
+            editingId={editingId}
+            onLongPress={(id) => setEditingId(id)}
+            onUpdateNote={(id, text) => updateNote(id, text)}
+            textareaRefs={textareaRefs}
+            onDelete={requestDelete}
+            onAddPhoto={onAddPhoto}
+            onCardClick={(id) => {
+              if (editingId && editingId !== id) setEditingId(null);
+            }}
+            onDoneEditing={() => setEditingId(null)}
+            active={active}
+            show={handleShow}
+            timelineRef={timelineRef}
+            galleryRef={galleryRef}
+            containerRef={containerRef}
+            wrapperRef={wrapperRef}
+            indicatorRef={indicatorRef}
+            pagerBind={pagerBind}
+            plantId={plantId ?? ""}
+            onSelectPhoto={setSelectedPhoto}
+            refreshGallery={refreshGallery}
+            plant={plant ? plant : null}
+            //#
+
           />
         </div>
-
-        {/* Tabs */}
-        <PlantTabs
-          items={items}
-          editingId={editingId}
-          onLongPress={(id) => setEditingId(id)}
-          onUpdateNote={(id, text) => updateNote(id, text)}
-          textareaRefs={textareaRefs}
-          onDelete={requestDelete}
-          onAddPhoto={onAddPhoto}
-          onCardClick={(id) => {
-            if (editingId && editingId !== id) setEditingId(null);
-          }}
-          onDoneEditing={() => setEditingId(null)}
-          active={active}
-          show={handleShow}
-          timelineRef={timelineRef}
-          galleryRef={galleryRef}
-          containerRef={containerRef}
-          wrapperRef={wrapperRef}
-          indicatorRef={indicatorRef}
-          pagerBind={pagerBind}
-          plantId={plantId ?? ""}
-          onSelectPhoto={setSelectedPhoto}
-          refreshGallery={refreshGallery}
-          plant={plant ? plant : null}
-          //#
-
-        />
-      </div>
+      </>
+      )}
 
       {/* Delete modal */}
       <ConfirmDeleteModal
@@ -578,7 +611,7 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
         }}
         plant={plant || null}
       />
-
+{/* 
       <AssignPotModal
         open={assignModalOpen}
         qrCode={qrCode || ""}
@@ -594,10 +627,10 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
           setAssignModalOpen(false);
           setPotFormOpen(true);
         }}
-      />
+      /> */}
 
 
-      <PotFormModal
+      {/* <PotFormModal
 
         open={potFormOpen}
         qrCode={qrCode || ""}
@@ -615,8 +648,8 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
           setPotFormOpen(false);
           setQrCode(null);
         }}
-      />
-      <PlantFormModal
+      /> */}
+      {/* <PlantFormModal
         open={plantFormOpen}
         potId={plantPotId || ""}
         parentPlant={plant || undefined}
@@ -629,8 +662,8 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
           setPlantFormOpen(false);
           setPlantPotId(null);
         }}
-      />
-      <ScanModal
+      /> */}
+      <ScanScreen
         open={scannerOpen}
         heading={scannerHeading}
         onClose={() => setScannerOpen(false)}

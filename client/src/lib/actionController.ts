@@ -108,7 +108,7 @@ export async function newPlant(
   action?: Action
 ): Promise<any> {
   console.log("Starting new plant flow");
-  const details = await createPlantFormPromise(potId);
+  const details = await createPlantFormPromise(potId, plant);
   console.log("Received plant details", details);
 
   // 1. Create the child plant
@@ -204,6 +204,7 @@ export const actionHandlers: Record<
   },
 
   kill: async (action, {plant, addTimelineCard}) => {
+    return;
 
     const freePot = await apiFreePot(plant.potId);
     console.log("Freed pot", freePot);

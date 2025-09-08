@@ -14,6 +14,7 @@ export async function getActions() {
         sort as actionSort
         FROM actions
         WHERE deleted = 0
+        AND quick = 1
         ORDER BY sort ASC
         `
     );

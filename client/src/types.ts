@@ -28,7 +28,7 @@ export interface Task {
   plantId: string;
   plantName: string;
   potCode: string;
-  photo: string;
+  plantPhoto: string;
   due: string; // ISO date
   dueDate: string;
   effect: string; // lowercase effect name, e.g. "watering"

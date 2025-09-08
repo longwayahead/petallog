@@ -13,7 +13,7 @@ export async function findPlantByPot(potId) {
     "SELECT * FROM plants_pots WHERE pots_id = ? AND ended_at IS NULL",
     [potId]
   );
- return rows[0] || null;
+ return rows[0];
 }
 
 export async function findPotByQr(code) {

@@ -1,11 +1,34 @@
+import PageHeader from "../../../ui/TopNav";
+
 export default function FeedPage() {
   return (
-    <main className="app-root app-container mx-auto max-w-md bg-white text-gray-800 pb-16">
-      <header className="sticky top-0 z-10 bg-white border-b px-4 h-[56px] flex items-center">
-        <h1 className="text-lg font-semibold">Home</h1>
-      </header>
-      <div className="p-4">
-        <p className="text-gray-600">Latest interactions feed (coming soon)…</p>
+    <main className="app-root app-container mx-auto max-w-md bg-white text-gray-800">
+      <PageHeader title="Home" showBackButton={false} />
+
+      {/* Feed content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4 space-y-4">
+          {/* Placeholder skeletons */}
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="flex items-center space-x-3 animate-pulse"
+            >
+              {/* Avatar circle */}
+              <div className="w-12 h-12 rounded-full bg-gray-200" />
+
+              {/* Text lines */}
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-2/3 bg-gray-200 rounded" />
+                <div className="h-3 w-1/2 bg-gray-200 rounded" />
+              </div>
+            </div>
+          ))}
+
+          <p className="text-center text-gray-400 text-sm pt-6">
+            Latest interactions feed (coming soon)…
+          </p>
+        </div>
       </div>
     </main>
   );

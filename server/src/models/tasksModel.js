@@ -6,6 +6,7 @@ export async function getTasks() {
       t.id AS taskID,
       p.id AS plantID,
       p.friendly_name AS plantName,
+      o.thumbnail_url as plantPhoto,
       ts.name AS statusName,
       ts.sort AS statusSort,
       e.name AS effectName,
@@ -24,6 +25,7 @@ export async function getTasks() {
       ) AS actions
     FROM tasks t
     LEFT JOIN plants p ON t.plants_id = p.id
+    LEFT JOIN photos o ON o.id = p.photo_id
     LEFT JOIN effects e ON t.effect_id = e.id
     LEFT JOIN tasks_statuses ts ON t.status_id = ts.id
     LEFT JOIN actions_effects ae ON ae.effects_id = e.id

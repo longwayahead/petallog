@@ -45,6 +45,8 @@ export async function deletePhoto(photoId) {
   const photo = await getPhotoById(photoId);
   if (!photo) return null;
 
+  await pool.query(`UPDATE plants SET photo_id = null WHERE photo_id = ?`, [photoId]);
+
   await pool.query("DELETE FROM photos WHERE id = ?", [photoId]);
   return photo;
 }
