@@ -25,3 +25,18 @@ export async function findPotByQr(code) {
   );
   return rows[0] || null;
 }
+
+export async function insertCodes(codes) {
+  if (!codes.length) return {inserted: 0};
+  const values = codes.map(c=>[c]);
+  const [result] = await pool.query(`
+  INSERT IGNORE INTO qrcodes (code) VALUES ?`, [values]);
+  return {inserted: result.affectedRows};
+}
+
+export async function getCodesBatch(limit, offset){
+  const [rows] = await pool.query(`
+    SELECT * FROM qrcodes WHERE deleted = 0 LIMIT ? OFFSET ?
+    `, [limit, offset]);
+  return rows;
+}
