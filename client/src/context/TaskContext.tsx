@@ -20,16 +20,26 @@ const TaskContext = createContext<TaskContextType | undefined>(undefined);
 export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const loadTasks = async () => {
-    try {
-      const res = await fetch("/api/tasks");
-      const data: Task[] = await res.json();
-      setTasks(data);
-    } catch (e) {
-      console.error("Failed to fetch tasks", e);
-      setTasks([]); // fallback
-    }
-  };
+const loadTasks = async () => {
+  try {
+    const res = await fetch("/api/tasks");
+    const raw = await res.json();
+    //double mapped in notificationspage too. maybe think about consolidating into mappers.ts?
+    const mapped: Task[] = raw.map((t: any) => ({
+      id: String(t.taskID),
+      plantId: String(t.plantID),
+      actions: t.actions?.map((a: any) => a.actionName) || [],
+      due: t.due_date || new Date().toISOString().slice(0, 10),
+      status: t.statusName.toLowerCase() === "pending" ? "pending" : "done",
+    }));
+
+    setTasks(mapped);
+  } catch (e) {
+    console.error("Failed to fetch tasks", e);
+    setTasks([]);
+  }
+};
+
 
   useEffect(() => {
     loadTasks();

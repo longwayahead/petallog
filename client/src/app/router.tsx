@@ -9,6 +9,10 @@ import PlantsPage from "../features/search/pages/PlantsPage";
 import NotificationsPage from "../features/tasks/pages/NotificationsPage";
 import SettingsPage from "../features/settings/pages/SettingsPage";
 import ScanScreen from "../features/scanner/pages/ScanScreen";
+import CreateUserPage from "../features/users/pages/CreateUserPage";
+
+import AuthGate from "../app/AuthGate";
+import LoginPage from "../features/users/pages/LoginPage";
 
 // Plant profile detail
 import PlantProfilePage from "../features/plants/pages/PlantProfilePage";
@@ -34,17 +38,62 @@ export const router = createBrowserRouter([
       {
         element: <TabLayout />,
         children: [
-          { index: true, element: <FeedPage /> },
-          { path: "plants", element: <PlantsPage /> },
-          { path: "tasks", element: <NotificationsPage /> },
-          { path: "settings", element: <SettingsPage /> },
-          { path: "plants/:plantId", element: <PlantProfilePage /> },
+          { 
+            index: true,
+             element: (
+             <AuthGate>
+                <FeedPage />
+              </AuthGate>
+            ),
+          },
+          { path: "plants",
+            element: (
+              <AuthGate>
+                <PlantsPage />
+              </AuthGate>
+            ),
+          },
+          { path: "plants/:plantId", 
+            element: (
+              <AuthGate>
+                <PlantProfilePage />
+              </AuthGate>
+            )
+          },
+          { path: "settings", 
+            element: (
+              <AuthGate>
+                <SettingsPage />
+              </AuthGate>
+            )
+          },
+          {
+            path: "tasks",
+            element: (
+              <AuthGate>
+                <NotificationsPage />
+              </AuthGate>
+            ),
+          },
+          { path: "users/new", 
+            element: (
+              <AuthGate>
+                <CreateUserPage />
+              </AuthGate>
+            )
+          },
         ],
       },
       {
         element: <NoNavLayout />,
         children: [
-          { path: "scan", element: <ScanScreenWrapper /> },
+          { path: "scan", 
+            element: (
+            <AuthGate>
+              <ScanScreenWrapper />
+            </AuthGate>
+            ) },
+          { path: "login", element: <LoginPage /> },
         ],
       },
       { path: "*", element: <Navigate to="/" replace /> },

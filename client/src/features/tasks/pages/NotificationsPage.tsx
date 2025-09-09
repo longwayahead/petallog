@@ -71,7 +71,7 @@ export default function NotificationsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  console.log("Tasks loaded:", tasks);
+  // console.log("Tasks loaded:", tasks);
 
   const groups = groupTasksForFeed(tasks);
 
