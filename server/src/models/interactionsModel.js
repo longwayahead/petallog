@@ -76,3 +76,61 @@ export async function deleteInteraction(id) {
     );
     return result;
 }
+
+export async function getFeed(limit = 20, offset = 0) {
+  const [rows] = await pool.execute(
+    `
+    SELECT
+      i.id AS interactionID,
+      i.plant_id AS plantID,
+      pl.friendly_name AS plantName,
+      pl.species AS plantSpecies,
+      pl.alive AS plantAlive,
+      n.id AS plantPhotoID,
+      n.url AS plantPhotoURL,
+      n.thumbnail_url AS plantPhotoThumbnailURL,
+      i.action_id AS actionID,
+      a.name AS actionName,
+      a.name_past AS actionNamePast,
+      a.icon AS actionIcon,
+      a.colour AS actionColour,
+      a.background AS actionBackground,
+      i.note AS interactionNote,
+      i.created_at AS createdAt,
+      CONCAT(
+        '[',
+        COALESCE(
+          GROUP_CONCAT(
+            CASE 
+              WHEN p.id IS NOT NULL THEN JSON_OBJECT(
+                'id', p.id,
+                'url', p.url,
+                'thumbnail_url', p.thumbnail_url,
+                'created_at', p.created_at
+              )
+            END
+            ORDER BY p.created_at DESC
+          ),
+          ''
+        ),
+        ']'
+      ) AS photos
+    FROM interactions i
+    LEFT JOIN plants pl ON pl.id = i.plant_id
+    LEFT JOIN actions a ON a.id = i.action_id
+    LEFT JOIN photos p ON p.interaction_id = i.id
+    LEFT JOIN photos n ON n.id = pl.photo_id
+    WHERE a.deleted = 0
+      AND i.deleted = 0
+    GROUP BY i.id
+    ORDER BY i.created_at DESC
+    LIMIT ? OFFSET ?
+    `,
+    [limit, offset]
+  );
+
+  return rows.map((row) => ({
+    ...row,
+    photos: row.photos ? JSON.parse(row.photos).filter((p) => p) : [],
+  }));
+}

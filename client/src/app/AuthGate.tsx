@@ -1,9 +1,11 @@
 // src/app/AuthGate.tsx
 import { useSession } from "../lib/auth-client";
 import LoginPage from "../features/users/pages/LoginPage";
+import {Navigate, useLocation} from "react-router-dom";
 
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession();
+  const location = useLocation();
 
   if (isPending) {
     return (
@@ -14,7 +16,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   if (!session) {
-    return <LoginPage />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

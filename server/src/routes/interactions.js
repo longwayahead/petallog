@@ -6,5 +6,6 @@ const router = express.Router();
 router.post("/", interactionsController.addInteraction); // POST /api/interactions/
 router.patch("/:id", interactionsController.updateInteractionNote); // PATCH /api/interactions/:id
 router.delete("/:id", interactionsController.deleteInteraction); // DELETE /api/interactions/:id
+router.get("/feed", interactionsController.getFeed); // GET /api/interactions/feed
 
 export default router;

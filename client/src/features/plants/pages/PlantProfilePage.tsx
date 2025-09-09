@@ -481,8 +481,8 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
           }
         }
         menuItems={[
-          { label: "Edit Plant", onClick: () => setPlantFormOpen(true) },
-          { label: "Delete Plant", onClick: () => setConfirmDeleteId(plant?.plantId.toString() ?? null) },
+          { label: "Mng Cr", onClick: () => setPlantFormOpen(true) },
+          // { label: "Delete Plant", onClick: () => setConfirmDeleteId(plant?.plantId.toString() ?? null) },
         ]}
       />
 

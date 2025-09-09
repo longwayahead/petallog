@@ -28,11 +28,9 @@ export default function PendingTaskBanner({ tasks }: PendingTasksProps) {
         today.setHours(0, 0, 0, 0);
         dueDate.setHours(0, 0, 0, 0);
 
-        // 🔹 derive status dynamically
         const isOverdue = dueDate < today;
         const status = isOverdue ? "Overdue" : task.statusName;
 
-        // 🔹 style based on status
         let style = "bg-gray-100 text-gray-800";
         if (task.statusId == 1) style = "bg-red-100 text-red-800";
         else if (dueDate.getTime() === today.getTime())
@@ -45,7 +43,7 @@ export default function PendingTaskBanner({ tasks }: PendingTasksProps) {
           >
             <i className="fas fa-exclamation-circle" />
             <span>
-              Task {status?.toLowerCase()}: {task.effectName} (due{" "}
+              Task {status?.toLowerCase()}: {task.effectName} (
               {formatDueDate(dueDate)})
             </span>
           </div>

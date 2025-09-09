@@ -21,7 +21,7 @@ export const auth = betterAuth({
     requireEmailVerification: false,
     minPasswordLength: 4,
  }, 
-  trustedOrigins: ["http://localhost:5173", "http://localhost:5000"],
+  trustedOrigins: ["http://localhost:5173", "http://localhost:5000", "https://lighter-ix-ld-heart.trycloudflare.com"],
 
 //   // Look up a user by email
 //   async findUserByEmail(email) {

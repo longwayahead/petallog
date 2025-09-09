@@ -44,7 +44,7 @@ export default function PlantFormModal({
   });
 //   console.log("parent plant", parentPlant);
 
-console.log(parentPlant);
+// console.log(parentPlant);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 

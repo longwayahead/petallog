@@ -77,3 +77,13 @@ export async function deleteInteraction(req, res) {
         res.status(500).json({ message: "Server error", error: err.message });
     }
 }
+
+export async function getFeed(req, res, next) {
+    try {
+        const { limit = 20, offset = 0 } = req.query;
+        const feed = await Interactions.getFeed(limit, offset);
+        res.json(feed);
+    } catch (err) {
+        next(err);
+    }   
+}

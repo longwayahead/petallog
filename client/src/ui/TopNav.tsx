@@ -1,5 +1,4 @@
-// src/ui/PageHeader.tsx
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 type PageHeaderProps = {
@@ -11,7 +10,7 @@ type PageHeaderProps = {
     potName?: string | null;
     plantPhoto?: string | null;
   } | null;
-  menuItems?: { label: string; onClick: () => void }[];
+  menuItems?: { label: ReactNode; onClick: () => void }[];
   showBackButton?: boolean; // 🔹 new prop
 };
 
@@ -67,35 +66,51 @@ export default function PageHeader({
     {/* Right: Menu or placeholder */}
     {menuItems.length > 0 ? (
       <div className="relative w-8 text-right" ref={menuRef}>
-        <button
-          onClick={() => setMenuOpen((o) => !o)}
-          className="text-gray-600"
-        >
-          <i className="fas fa-ellipsis-h" />
-        </button>
+    <button
+      onClick={() => setMenuOpen((o) => !o)}
+      className="relative flex items-center justify-center w-8 h-8"
+    >
+      {/* Ellipsis (shown when menu closed) */}
+      <i
+        className={`fas fa-ellipsis-h text-gray-600 text-lg absolute transition-all duration-300 ${
+          menuOpen ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
+        }`}
+      />
 
-        {/* Dropdown menu */}
-        <div
-          className={`absolute right-0 mt-2 w-44 rounded-xl bg-white shadow-lg ring-1 ring-black/5 transform transition-all duration-200 origin-top-right ${
-            menuOpen
-              ? "scale-100 opacity-100"
-              : "scale-95 opacity-0 pointer-events-none"
-          }`}
+      {/* Image (shown when menu open, animates up) */}
+      <img
+        src="/assets/stanley.png"
+        alt="Menu"
+        className={`w-8 h-8 rounded-full object-cover border absolute transition-all duration-300 ${
+          menuOpen
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
+      />
+    </button>
+
+    {/* Dropdown menu */}
+    <div
+      className={`absolute right-0 mt-2 w-44 rounded-xl bg-white shadow-lg ring-1 ring-black/5 transform transition-all duration-200 origin-top-right ${
+        menuOpen
+          ? "scale-100 opacity-100"
+          : "scale-95 opacity-0 pointer-events-none"
+      }`}
+    >
+      {menuItems.map((item, idx) => (
+        <button
+          key={idx}
+          onClick={() => {
+            item.onClick();
+            setMenuOpen(false);
+          }}
+          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
         >
-          {menuItems.map((item, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                item.onClick();
-                setMenuOpen(false);
-              }}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
+          {item.label}
+        </button>
+      ))}
+    </div>
+  </div>
     ) : (
       <div className="w-8" /> // keeps title centered
     )}

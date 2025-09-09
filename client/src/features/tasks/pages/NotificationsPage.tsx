@@ -4,32 +4,59 @@ import { type Task } from "../../../types";
 import PageHeader from "../../../ui/TopNav";
 import { fuzzyDate } from "../../../utils/date.ts";
 
-// --- Helper: group tasks like Instagram notifications ---
+// --- Normalize dates to midnight ---
+function normalize(date: Date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// --- Group tasks into Today / This Week / Earlier ---
 function groupTasksForFeed(tasks: Task[]) {
-  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-  const weekAhead = new Date();
-  weekAhead.setDate(weekAhead.getDate() + 7);
+  const today = normalize(new Date());
+  const weekAhead = normalize(new Date());
+  weekAhead.setDate(today.getDate() + 7);
 
   return {
-    today: tasks.filter((t) => t.due === today && t.status === "pending"),
+    today: tasks.filter((t) => {
+      const dueDate = normalize(new Date(t.due));
+      return dueDate.getTime() === today.getTime() && t.status === "pending";
+    }),
     thisWeek: tasks.filter((t) => {
-      const dueDate = new Date(t.due);
-      return t.due > today && dueDate <= weekAhead && t.status === "pending";
+      const dueDate = normalize(new Date(t.due));
+      return dueDate > today && dueDate <= weekAhead && t.status === "pending";
     }),
     earlier: tasks.filter((t) => {
-      const dueDate = new Date(t.due);
+      const dueDate = normalize(new Date(t.due));
       return (
-        (t.due < today && t.status === "pending") || // overdue
+        (dueDate < today && t.status === "pending") || // overdue
         t.status === "done" || // completed
-        dueDate > weekAhead // beyond a week
+        dueDate > weekAhead // future
       );
     }),
   };
 }
 
+// --- Sorting helper ---
+function sortTasks(tasks: Task[], mode: "default" | "plant" | "action") {
+  if (mode === "plant") {
+    return [...tasks].sort((a, b) => a.plantName.localeCompare(b.plantName));
+  }
+  if (mode === "action") {
+    return [...tasks].sort((a, b) => a.effect.localeCompare(b.effect));
+  }
+  // default: sort by due date asc
+  return [...tasks].sort(
+    (a, b) => new Date(a.due).getTime() - new Date(b.due).getTime()
+  );
+}
+
 export default function NotificationsPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortMode, setSortMode] = useState<"default" | "plant" | "action">(
+    "default"
+  );
   const navigate = useNavigate();
 
   // --- Live fetch from API ---
@@ -71,29 +98,34 @@ export default function NotificationsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // console.log("Tasks loaded:", tasks);
-
-  const groups = groupTasksForFeed(tasks);
+  const sortedTasks = sortTasks(tasks, sortMode);
+  const groups = groupTasksForFeed(sortedTasks);
 
   const handleTap = (task: Task) => {
     navigate(`/plants/${task.plantId}`);
   };
 
+  const stanleyLabel = (
+    <>srt by <span style={{ display: "inline-block", transform: "scaleX(-1)" }}>a</span>ctn</>
+  );
+
   return (
     <div className="mx-auto max-w-md bg-white text-gray-800 min-h-screen">
       <PageHeader
         title="Tasks"
-        // menuItems={[
-        //   { label: "Mark all as done", onClick: () => console.log("done!") },
-        // ]}
-        showBackButton={false}  
+        showBackButton={false}
+        menuItems={[
+          { label: "srt by dt", onClick: () => setSortMode("default") },
+          { label: "srt by plnt", onClick: () => setSortMode("plant") },
+          { label: stanleyLabel, onClick: () => setSortMode("action") },
+        ]}
       />
 
       {/* Loading state */}
       {loading ? (
         <div className="flex items-center justify-center h-[calc(100vh-60px-56px)]">
-  <div className="h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-</div>
+          <div className="h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        </div>
       ) : tasks.length === 0 ? (
         <div className="p-8 text-center text-gray-500">
           All the plants are snug 🦈
@@ -138,7 +170,7 @@ export default function NotificationsPage() {
                         </div>
                       </div>
 
-                      {/* Status or chevron */}
+                      {/* Status */}
                       {task.status === "pending" ? (
                         <span className="text-emerald-600 text-xs font-semibold mr-2">
                           Pending

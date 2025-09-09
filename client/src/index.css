@@ -14,7 +14,7 @@ body { font-family: 'Inter', sans-serif !important; }
 
 
 :root { --tab-indicator-h: 3px; }
-body { min-height: 100dvh; height: 100dvh; overflow: hidden; overscroll-behavior-y: none; }
+/* body { min-height: 100dvh; height: 100dvh; overflow: hidden; overscroll-behavior-y: none; } */
 .app-root { min-height: 100dvh; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
 /* Timeline column line */
 .timeline-item::before{content:"";position:absolute;left:12px;top:32px;bottom:-16px;width:2px;background:#e5e7eb}
