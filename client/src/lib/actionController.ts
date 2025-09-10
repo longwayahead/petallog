@@ -204,7 +204,9 @@ export const actionHandlers: Record<
   },
 
   kill: async (action, {plant, addTimelineCard}) => {
-    return;
+    alert(`You are about to mark "${plant.plantName}" as dead. This action cannot be undone.`);
+    const confirm = window.confirm("Are you sure? This action cannot be undone.");
+    if (!confirm) return;
 
     const freePot = await apiFreePot(plant.potId);
     console.log("Freed pot", freePot);

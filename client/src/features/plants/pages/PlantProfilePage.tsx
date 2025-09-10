@@ -1,7 +1,7 @@
 // src/features/plants/pages/PlantProfilePage.tsx
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import type { ApiInteraction, Preference, Plant, Task, Action, Photo, CreatePot, ActionsApi } from "../../../types";
+import type { ApiInteraction, Preference, Plant, Task, Action, Photo } from "../../../types";
 import { useTabs } from "../../../hooks/useTabs";
 import { usePagerSwipe } from "../../../hooks/swipe/usePageSwipe";
 import {useInteractions} from "../hooks/useInteractions";
@@ -20,14 +20,12 @@ import PlantTabs from "../components/PlantTabs";
 import {createScannerPromise} from "../../../lib/scannerBridge";
 import CameraCaptureOverlay from "../components/CameraCaptureOverlay";
 import PhotoModal from "../components/Modals/PhotoModal";
-import PotFormModal from "../../pots/Modals/PotFormModal";
-import PlantFormModal from "../../plants/Modals/PlantFormModal";
-// import ChoosePotActionModal from "../../pots/Modals/chooseActionModal";
-import AssignPotModal from "../../pots/Modals/AssignPotModal";
-// import ScanModal from "../../scanner/Modals/ScanModal";
+import ManagePlantCareModal from "../components/Modals/ManagePlantCareModal";
 import ScanScreen from "../../scanner/pages/ScanScreen";
-import {actionsApi, apiCreatePot} from "../../../lib/potService"; 
-import { resolvePlantForm, subscribePendingPlant, resolvePotForm, resolveAssignPotCreate, resolveAssignPot, subscribePendingQr } from "../../../lib/potFormBridge";
+import {actionsApi} from "../../../lib/potService"; 
+
+
+
 
 // simple debounce util
 function debounce<F extends (...args: any[]) => void>(fn: F, delay: number) {
@@ -74,9 +72,7 @@ useEffect(() => {
 }, [loading]); //rerun after page loaded
 
 
-
-  useEffect(() => {
-    async function loadPreferences() {
+const loadPreferences = useCallback(async () => {
       try {
         const res = await fetch(`/api/plants/${plantId}/preferences`);
         if (!res.ok) throw new Error("Failed to fetch preferences");
@@ -86,9 +82,12 @@ useEffect(() => {
         console.error("Failed to load preferences", err);
         setPreferences([]);
       }
-    }
-    if (plantId) loadPreferences();
-  }, [plantId]);
+    }, [plantId]);
+
+
+  useEffect(() => {
+    loadPreferences();
+  }, [loadPreferences]);
 
 
 const { items, setItems, addTimelineCard, mapApiToInteraction } = useInteractions();
@@ -204,23 +203,40 @@ useEffect(() => {
 }, [loadTasks]);
 
   // Load interactions from API
-  useEffect(() => {
+const location = useLocation();
+
+// after setting items (in loadInteractions effect)
+useEffect(() => {
+  if (!plantId) return;
+
   async function loadInteractions() {
     try {
       const res = await fetch(`/api/plants/${plantId}/interactions`);
       if (!res.ok) throw new Error("Failed to fetch interactions");
       const data: ApiInteraction[] = await res.json();
-      // console.log("Loaded interactions:", data);
       const mappedItems = data.map(mapApiToInteraction);
-      // console.log("Mapped interactions:", mappedItems);
       setItems(mappedItems);
+
+      // 🔹 Wait a tick so DOM renders cards
+      setTimeout(() => {
+        // console.log("Checking for hash", location.hash);
+        if (location.hash) {
+          const el = document.querySelector(location.hash);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+            //can open the card with the below...
+            // setEditingId(location.hash.includes("i-") ? location.hash.replace("#i-", "") : null);
+          }
+        }
+      }, 50);
     } catch (err) {
       console.error("Failed to load interactions", err);
-      setItems([]); // fall back empty
+      setItems([]);
     }
   }
-  if (plantId) loadInteractions();
-}, [plantId]);
+
+  loadInteractions();
+}, [plantId, location.hash]);
 
 // set actions in the actions bar
 const [actions, setActions] = useState<Action[]>([]);
@@ -325,7 +341,7 @@ const onAddPhoto = (id: string) => {
 };
 
 const [refreshGallery, setRefreshGallery] = useState(0);
-const handleCapture = async (file: File, previewUrl: string, thumbUrl?:string) => {
+const handleCapture = async (file: File, thumbUrl?:string) => {
   if (!cameraFor) return;
 
   //create temporary photo
@@ -427,11 +443,11 @@ const handleDeletePhoto = async (photoId: string) => {
   }
 }
 
-const [potFormOpen, setPotFormOpen] = useState(false);
-const [qrCode, setQrCode] = useState<string | null>(null);
-const [assignModalOpen, setAssignModalOpen] = useState(false);
-const [plantFormOpen, setPlantFormOpen] = useState(false);
-const [plantPotId, setPlantPotId] = useState<string | null>(null);
+// const [potFormOpen, setPotFormOpen] = useState(false);
+// const [qrCode, setQrCode] = useState<string | null>(null);
+// const [assignModalOpen, setAssignModalOpen] = useState(false);
+// const [plantFormOpen, setPlantFormOpen] = useState(false);
+// const [plantPotId, setPlantPotId] = useState<string | null>(null);
 
 
 // useEffect(() => {
@@ -465,7 +481,7 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
 
 // console.log("The current potid is ", plant?.potId);
 
-
+const [plantCareFormOpen, setPlantCareFormOpen] = useState(false);
 
   return (
     <div className="mx-auto max-w-md bg-white text-gray-800">
@@ -481,7 +497,7 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
           }
         }
         menuItems={[
-          { label: "Mng Cr", onClick: () => setPlantFormOpen(true) },
+          { label: "mng cr", onClick: () => setPlantCareFormOpen(true) },
           // { label: "Delete Plant", onClick: () => setConfirmDeleteId(plant?.plantId.toString() ?? null) },
         ]}
       />
@@ -537,6 +553,8 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
                 });
                 await loadPlant();
                 await loadTasks();
+                //switch to timeline
+                show(0);
                 
               }}
             />
@@ -663,6 +681,12 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
           setPlantPotId(null);
         }}
       /> */}
+      <ManagePlantCareModal
+        open={plantCareFormOpen}
+        onClose={() => setPlantCareFormOpen(false)}
+        plant={plant}
+        onSaved={loadPreferences}
+      />
       <ScanScreen
         open={scannerOpen}
         heading={scannerHeading}

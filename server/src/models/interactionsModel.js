@@ -1,9 +1,10 @@
 import pool from "../config/db.js";
 
-export async function createInteraction(plantId, actionId, note=null) {
+
+export async function createInteraction(plantId, actionId, note=null, userId) {
     const [result] = await pool.execute(
-        `INSERT INTO interactions (plant_id, action_id, note)   VALUES (?, ?, ?)`,
-        [plantId, actionId, note]
+        `INSERT INTO interactions (plant_id, action_id, note, user_id) VALUES (?, ?, ?, ?)`,
+        [plantId, actionId, note, userId]
     );
     
     const [rows] = await pool.execute(

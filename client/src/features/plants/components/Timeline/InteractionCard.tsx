@@ -120,7 +120,9 @@ export default function InteractionCard({
   }, [editing]);
 
   return (
-    <div className="relative timeline-item pl-6 pb-4">
+    <div 
+    id={`i-${data.id}`}    
+    className="relative timeline-item pl-6 pb-4">
       {/* Badge */}
       <div
         className={`absolute left-0 w-8 h-8 ${data.badgeBg} rounded-full flex items-center justify-center z-10`}

@@ -9,6 +9,7 @@ import tasksRoutes from "./routes/tasks.js";
 import qrRoutes from "./routes/qrcodes.js";
 import interactionsRoutes from "./routes/interactions.js";
 import actionsRoutes from "./routes/actions.js";
+import effectsRoutes from "./routes/effects.js";
 import photosRoutes from "./routes/photos.js";
 import potsRoutes from "./routes/pots.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -37,6 +38,7 @@ app.use("/api/tasks", tasksRoutes);
 app.use("/api/qr", qrRoutes);
 app.use("/api/interactions", interactionsRoutes);
 app.use("/api/actions", actionsRoutes);
+app.use("/api/effects", effectsRoutes);
 app.use("/api", photosRoutes);
 app.use("/api/pots", potsRoutes);
 

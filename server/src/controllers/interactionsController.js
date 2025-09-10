@@ -1,9 +1,19 @@
 import * as Interactions from "../models/interactionsModel.js";
 import * as Tasks from "../models/tasksModel.js";
 import { getPhotosByInteraction } from "../models/photosModel.js";
+import { auth } from "../utils/auth.js";
 
 export async function addInteraction(req, res, next) {
     try{
+
+        //get the user
+        const session = await auth.api.getSession({headers:req.headers});
+        if (!session || !session.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const userId = session.user.id;
+
         const { plantId, actionId } = req.query;
         const { note } = req.body;
 
@@ -12,7 +22,7 @@ export async function addInteraction(req, res, next) {
         }
 
         // Create the new interaction card for the plant
-        const newInteraction = await Interactions.createInteraction(plantId, actionId, note);
+        const newInteraction = await Interactions.createInteraction(plantId, actionId, note, userId);
 
         //lookup effects of the action
         const effects = await Interactions.findEffects(actionId);

@@ -83,7 +83,7 @@ export interface Preference {
   plantsEffectsID: number;     // row in plants_effects
   effectID: number;            // the care "category" (watering, feeding, etc.)
   effectName: string;
-
+  effectVerb: string;          // e.g. "Water", "Feed" - for
   // presentation (pulled from one linked action)
   actionName: string;          // e.g. "Water"
   namePast: string;            // e.g. "Watered"

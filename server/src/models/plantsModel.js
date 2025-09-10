@@ -84,6 +84,7 @@ export async function findCarePreferences(plantId) {
       pe.frequency_days as frequencyDays,
       e.id as effectID,
       e.name as effectName,
+      e.verb as effectVerb,
 
       -- pick one "representative" action for display
       a.name as actionName,
@@ -103,7 +104,7 @@ export async function findCarePreferences(plantId) {
       AND e.deleted = 0
       AND a.deleted = 0
     GROUP BY pe.id, e.id
-    ORDER BY e.name ASC
+    ORDER BY a.sort ASC
     `,
     [plantId]
   );
@@ -223,4 +224,33 @@ export async function createPlant({ plantName, species, acquiredAt, acquiredFrom
   } finally {
     conn.release();
   }
+}
+
+export async function addCarePreference(plantId, effectId, frequencyDays) {
+  const conn = await pool.getConnection();
+  const [result] = await conn.query(
+    `INSERT INTO plants_effects (plant_id, effect_id, frequency_days, flexible, notes)
+     VALUES (?, ?, ?, 0, NULL)`,
+    [plantId, effectId, frequencyDays]
+  );
+  return { plantsEffectsID: result.insertId, plantId, effectId, frequencyDays };
+}
+
+export async function updateCarePreference(plantId, plantsEffectsID, frequencyDays) {
+  const conn = await pool.getConnection();
+  const [result] = await conn.query(
+    `UPDATE plants_effects SET frequency_days = ?
+     WHERE id = ? AND plant_id = ?`,
+    [frequencyDays, plantsEffectsID, plantId]
+  );
+  return result.affectedRows > 0 ? { plantsEffectsID, frequencyDays } : null;
+}
+
+export async function deleteCarePreference(plantId, plantsEffectsID) {
+  const conn = await pool.getConnection();
+  const [result] = await conn.query(
+    `DELETE FROM plants_effects WHERE id = ? AND plant_id = ?`,
+    [plantsEffectsID, plantId]
+  );
+  return result.affectedRows > 0;
 }

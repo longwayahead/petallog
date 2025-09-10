@@ -42,7 +42,7 @@ export default function PlantInfo({
 
                 {/* Show effect name + frequency */}
                 <span>
-                  {pref.effectName} every{" "}
+                  {pref.effectVerb} every{" "}
                   {pref.frequencyDays > 1
                     ? `${pref.frequencyDays} days`
                     : "day"}

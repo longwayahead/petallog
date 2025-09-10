@@ -111,7 +111,7 @@ export default function FeedPage() {
                   key={item.interactionID}
                   className="cursor-pointer"
                   onClick={() =>
-                    (window.location.href = `/plants/${item.plantID}#interaction-${item.interactionID}`)
+                    (window.location.href = `/plants/${item.plantID}#i-${item.interactionID}`)
                   }
                 >
                   <div className="flex items-center gap-2 text-sm">

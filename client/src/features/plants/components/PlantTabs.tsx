@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from "react";
 import TabBar from "./TabBar";
 import TimelineList from "./Timeline/TimelineList";
 import GalleryGrid from "./GalleryGrid";
-import { useTabs } from "../../../hooks/useTabs";
 import { usePagerSwipe } from "../../../hooks/swipe/usePageSwipe";
 import type { Interaction, Photo, Plant } from "../../../types";
 

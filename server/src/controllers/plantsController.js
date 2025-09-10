@@ -116,3 +116,41 @@ export async function addPlant(req, res, next) {
     next(err);
   }
 }
+
+export async function addCarePreference(req, res, next) {
+  try {
+    const { effectID, frequencyDays } = req.body;
+    const plantId = req.params.plantId;
+
+    const newPref = await Plants.addCarePreference(plantId, effectID, frequencyDays);
+    res.status(201).json(newPref);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateCarePreference(req, res, next) {
+  try {
+    const { plantsEffectsID, frequencyDays } = req.body;
+    const plantId = req.params.plantId;
+
+    const updated = await Plants.updateCarePreference(plantId, plantsEffectsID, frequencyDays);
+    if (!updated) return res.status(404).json({ message: "Preference not found" });
+    res.json(updated);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteCarePreference(req, res, next) {
+  try {
+    const { plantsEffectsID } = req.body;
+    const plantId = req.params.plantId;
+
+    const deleted = await Plants.deleteCarePreference(plantId, plantsEffectsID);
+    if (!deleted) return res.status(404).json({ message: "Preference not found" });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+}
