@@ -1,21 +1,15 @@
 // src/features/pots/Modals/AssignPotModal.tsx
 import { useEffect, useState } from "react";
 
-type Pot = {
-  potsId: number;
-  potLocation: string | null;
-  potDiameter: number | null;
-  potHeight: number | null;
-  potFriendlyName: string;
-  potAcquiredAt: string | null;
-  potStatusName: string;
-};
-
-type Props = {
-  open: boolean;
-  onClose: () => void;
-  onAssign: (potId: number) => void;
-};
+// type Pot = {
+//   potsId: number;
+//   potLocation: string | null;
+//   potDiameter: number | null;
+//   potHeight: number | null;
+//   potFriendlyName: string;
+//   potAcquiredAt: string | null;
+//   potStatusName: string;
+// };
 
 type AssignPotModalProps = {
   open: boolean;

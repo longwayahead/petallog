@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import TabBar from "./TabBar";
 import TimelineList from "./Timeline/TimelineList";
 import GalleryGrid from "./GalleryGrid";
@@ -52,7 +52,7 @@ export default function PlantTabs({
   plant,
 }: PlantTabsProps) {
 
-  const refs = [timelineRef, galleryRef];
+  // const refs = [timelineRef, galleryRef];
 
  
   const { bind: pagerBind } = usePagerSwipe({

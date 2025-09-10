@@ -1,4 +1,3 @@
-import React from "react";
 import  type { Plant } from "../../../types";
 
 export default function PlantSummary({ plant }: { plant: Plant }) {

@@ -31,6 +31,7 @@ export function resolveChoosePotAction(choice: "create" | "assign") {
 
 // ---------- CREATE POT ----------
 let potFormResolver: ((data: any) => void) | null = null;
+// @ts-ignore
 let pendingQr: string | null = null;
 let chooseActionResolver: ((choice: "create" | "assign") => void) | null = null;
 
@@ -77,7 +78,9 @@ export function resolveAssignPotCreate() {
 
 // ---------- PLANT FORM ----------
 let plantFormResolver: ((data: any) => void) | null = null;
+// @ts-ignore
 let pendingPotId: string | null = null;
+// @ts-ignore
 let pendingParentPlant: Partial<Plant> | null = null;
 
 // IMPORTANT: subscriber now receives *both* potId and parentPlant

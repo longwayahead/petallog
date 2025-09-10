@@ -138,7 +138,7 @@ export function useSwipe({
   );
 
   const onPointerUp: React.PointerEventHandler<HTMLDivElement> = useCallback(
-    (e) => {
+    (_) => {
       if (!enabled) {
         reset();
         return;

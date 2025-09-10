@@ -1,4 +1,3 @@
-import React from "react";
 import type { Preference } from "../../../types";
 
 interface PlantInfoProps {

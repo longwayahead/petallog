@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState} from "react";
 import Webcam from "react-webcam";
 
 interface Props {
@@ -8,29 +8,29 @@ interface Props {
 
 export default function CameraCaptureOverlay({ onCapture, onCancel }: Props) {
   const webcamRef = useRef<Webcam>(null);
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  // const [currentIndex, setCurrentIndex] = useState(0);
   const [capturing, setCapturing] = useState(false);
 
   // Get available cameras
-  useEffect(() => {
-    async function loadDevices() {
-      try {
-        const all = await navigator.mediaDevices.enumerateDevices();
-        const videoInputs = all.filter((d) => d.kind === "videoinput");
-        setDevices(videoInputs);
+  // useEffect(() => {
+  //   async function loadDevices() {
+  //     try {
+  //       // const all = await navigator.mediaDevices.enumerateDevices();
+  //       // const videoInputs = all.filter((d) => d.kind === "videoinput");
+  //       // setDevices(videoInputs);
 
-        // Prefer first back camera
-        const envIndex = videoInputs.findIndex((d) =>
-          d.label.toLowerCase().includes("back")
-        );
-        if (envIndex >= 0) setCurrentIndex(envIndex);
-      } catch (err) {
-        console.error("Error loading cameras:", err);
-      }
-    }
-    loadDevices();
-  }, []);
+  //       // Prefer first back camera
+  //       // const envIndex = videoInputs.findIndex((d) =>
+  //       //   d.label.toLowerCase().includes("back")
+  //       // );
+  //       // if (envIndex >= 0) setCurrentIndex(envIndex);
+  //     } catch (err) {
+  //       console.error("Error loading cameras:", err);
+  //     }
+  //   }
+  //   loadDevices();
+  // }, []);
 
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
 
@@ -49,9 +49,9 @@ export default function CameraCaptureOverlay({ onCapture, onCancel }: Props) {
       if (!video) return;
 
       // Use track settings for full native resolution
-      const track = (video.srcObject as MediaStream)
-        ?.getVideoTracks?.()[0];
-      const settings = track?.getSettings();
+      // const track = (video.srcObject as MediaStream)
+        // ?.getVideoTracks?.()[0];
+      // const settings = track?.getSettings();
       const width = video.videoWidth;
       const height = video.videoHeight;
 

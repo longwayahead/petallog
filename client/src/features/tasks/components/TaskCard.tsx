@@ -1,4 +1,3 @@
-import React from "react";
 import {type Task} from "../../../types";
 
 export type TaskVariant = "default" | "overdue" | "today" | "completed";
@@ -30,7 +29,7 @@ export default function TaskCard({
     <div onClick={onClick} className={`${baseClasses} ${variantClasses}`}>
       <div className="flex items-center gap-3">
         <img
-          src={task.photo}
+          src={task.plantPhoto}
           alt={task.plantName}
           className="w-14 h-14 rounded-full object-cover border border-gray-200"
         />

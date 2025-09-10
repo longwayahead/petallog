@@ -1,6 +1,5 @@
 // src/app/AuthGate.tsx
 import { useSession } from "../lib/auth-client";
-import LoginPage from "../features/users/pages/LoginPage";
 import {Navigate, useLocation} from "react-router-dom";
 
 export default function AuthGate({ children }: { children: React.ReactNode }) {

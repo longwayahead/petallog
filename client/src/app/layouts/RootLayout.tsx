@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import AssignPotModal from "../../features/pots/Modals/AssignPotModal";
 import PotFormModal from "../../features/pots/Modals/PotFormModal";
 import PlantFormModal from "../../features/plants/Modals/PlantFormModal";
-import ScanScreen from "../../features/scanner/pages/ScanScreen";
 import {
   subscribePendingQr,
   resolveAssignPot,
@@ -13,9 +12,8 @@ import {
   subscribePendingPlant,
   resolvePlantForm,
 } from "../../lib/potFormBridge";
-import { createScannerPromise, pauseScanner, resumeScanner, closeScanner } from "../../lib/scannerBridge";
+import {  pauseScanner, resumeScanner } from "../../lib/scannerBridge";
 import type { Plant } from "../../types";
-import { set } from "date-fns";
 
 export default function RootLayout() {
   // 🔹 AssignPotModal
@@ -31,11 +29,10 @@ export default function RootLayout() {
    const [parentPlant, setParentPlant] = useState<Partial<Plant> | null | undefined>(undefined);
 
   // 🔹 Global scanner modal
-  const [scannerOpen, setScannerOpen] = useState(false);
-  const [scannerHeading, setScannerHeading] = useState("Scan a pot");
+  // const [scannerOpen, setScannerOpen] = useState(false);
+  // const [scannerHeading, setScannerHeading] = useState("Scan a pot");
 
 
- 
 
   // Sub: AssignPotModal
   useEffect(() => {
@@ -61,13 +58,13 @@ export default function RootLayout() {
   }, []);
 
   // Sub: Scanner (bridge promise → modal)
-  useEffect(() => {
-    // when actionController calls createScannerPromise → open scanner modal
-    (createScannerPromise as any)._open = (heading?: string) => {
-      setScannerHeading(heading || "Scan a pot");
-      setScannerOpen(true);
-    };
-  }, []);
+  // useEffect(() => {
+  //   // when actionController calls createScannerPromise → open scanner modal
+  //   (createScannerPromise as any)._open = (heading?: string) => {
+  //     // setScannerHeading(heading || "Scan a pot");
+  //     // setScannerOpen(true);
+  //   };
+  // }, []);
 
   return (
     <>

@@ -1,6 +1,6 @@
   
   import type { ApiInteraction } from "../types.ts";
-  import type { Interaction, Task } from "../types.ts";
+  import type { Interaction } from "../types.ts";
   
   export
   function mapApiToInteraction(api: ApiInteraction): Interaction {
