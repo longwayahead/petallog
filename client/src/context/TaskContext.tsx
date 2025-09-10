@@ -23,6 +23,10 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
 const loadTasks = async () => {
   try {
     const res = await fetch("/api/tasks");
+    if (!res.ok) {
+      console.error("Failed to fetch tasks", res.status, res.statusText);
+      return setTasks([]);
+    }
     const raw = await res.json();
     //double mapped in notificationspage too. maybe think about consolidating into mappers.ts?
     const mapped: Task[] = raw.map((t: any) => ({

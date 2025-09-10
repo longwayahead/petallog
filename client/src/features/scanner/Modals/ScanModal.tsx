@@ -44,6 +44,7 @@ export default function ScanModal({ open, heading = "Scan a pot", onClose }: Sca
       <div className="flex-1 p-4">
         <div className="aspect-[3/4] bg-gray-900 rounded-xl overflow-hidden">
           <Scanner
+            formats={["qr_code"]}
             onScan={(codes) => {
               const { rawValue } = codes[0] || {};
               if (rawValue) handleScan(rawValue);

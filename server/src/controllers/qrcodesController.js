@@ -1,5 +1,6 @@
 import * as QrModel from "../models/qrcodesModel.js";
 import {generateLabelPDF} from "../utils/pdfGenerator.js";
+import { auth } from "../utils/auth.js";
 
 const CONFIG = {
   showWireframe: false,
@@ -30,17 +31,24 @@ export async function checkQr(req, res, next) {
   try {
     const { code } = req.params;
 
-    
+    const session = await auth.api.getSession({ headers: req.headers });
+    if (!session || !session.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const userId = session.user.id;
 
     // check QR exists
     const qr = await QrModel.findQrByCode(code);
     if (!qr) {
+      await QrModel.recordScan(code, userId, 0, null, null);
       return res.status(404).json({ valid: false, potId: null, plantId: null  });
     }
 
     // check linked pot
     const pot = await QrModel.findPotByQr(code);
     if (!pot) {
+      await QrModel.recordScan(code, userId, 1, null, null);
       return res.json({ valid: true, potId: null, plantId: null });
     }
 
@@ -48,7 +56,8 @@ export async function checkQr(req, res, next) {
     // check active plant instance
     const plantInPot = await QrModel.findPlantByPot(pot.pots_id);
 
-    if (plantInPot) {  
+    if (plantInPot) {
+      await QrModel.recordScan(code, userId, 1, pot.pots_id, plantInPot.plants_id);
       return res.json({
         valid: true,
         potId: pot.pots_id,
@@ -56,12 +65,16 @@ export async function checkQr(req, res, next) {
 
       });
     } else {
+      await QrModel.recordScan(code, userId, 1, pot.pots_id, null);
       return res.json({
         valid: true,
         potId: pot.pots_id,
         plantId: null,
       });
     }
+
+    
+
   } catch (err) {
     next(err);
   }

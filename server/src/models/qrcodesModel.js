@@ -40,3 +40,11 @@ export async function getCodesBatch(limit, offset){
     `, [limit, offset]);
   return rows;
 }
+
+export async function recordScan(code, userId, valid, potsId, plantsId) {
+  const [result] = await pool.query(
+    `INSERT INTO qrcodes_scans (code, user_id, valid, pots_id, plants_id) VALUES (?, ?, ?, ?, ?)`,
+    [code, userId, valid, potsId, plantsId]
+  );
+  return result;
+}
