@@ -1,3 +1,4 @@
+//@ts-ignore
 import { formatDistanceToNow } from "date-fns";
 
 export function fuzzyDate(dateString: string): string {
