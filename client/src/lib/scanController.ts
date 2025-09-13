@@ -27,16 +27,21 @@ export async function scanController(qrCode: string, navigate: (path: string) =>
     if (!qr.potId) {
         //assign to existing pot or make a new pot?
         const result = await createAssignPotPromise(qrCode);
-        if (result === "create") {
+        if (result === null) {
+          // user cancelled
+          return;
+        } else if (result === "create") {
+           
             console.log("User chose to create a new pot, qrCode =", JSON.stringify(qrCode));
             console.log(qrCode);
             const details = await createPotFormPromise(qrCode);
+             if (!details) return; 
             console.log("scanController received details", details);
 
             const newPot = await apiCreatePot(details);
             console.log("Created pot", newPot);
             newPotId = String(newPot);
-            } else if (typeof result === "number" || typeof result === "string") {
+        } else if (typeof result === "number" || typeof result === "string") {
             
             console.log("Assigned existing pot", result);
 
@@ -52,6 +57,7 @@ export async function scanController(qrCode: string, navigate: (path: string) =>
   if ((qr.potId && !qr.plantId) || newPotId) {
     const potId: any = newPotId || qr.potId;
     const details = await createPlantFormPromise(potId, null);
+    if(!details) return; // user cancelled
     const newPlant = await apiCreatePlant({ ...details, potId: potId });
 
       if (details.photoFile) {

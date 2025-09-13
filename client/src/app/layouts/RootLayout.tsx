@@ -11,7 +11,10 @@ import {
   resolvePotForm,
   subscribePendingPlant,
   resolvePlantForm,
-  subscribePendingCreate
+  subscribePendingCreate,
+  cancelPotForm,
+  cancelAssignPot,
+  cancelPlantForm
 } from "../../lib/potFormBridge";
 import {  pauseScanner, resumeScanner } from "../../lib/scannerBridge";
 import type { Plant } from "../../types";
@@ -85,6 +88,7 @@ useEffect(() => {
         open={assignOpen}
         qrCode={qrCode || ""}
         onClose={() => {
+          cancelAssignPot();
           setAssignOpen(false);
           resumeScanner();
         }}
@@ -103,6 +107,7 @@ useEffect(() => {
         open={potFormOpen}
         qrCode={qrCode || ""}
         onClose={() => {
+          cancelPotForm();
           setPotFormOpen(false);
           setQrCode(null);
           resumeScanner();
@@ -121,6 +126,7 @@ useEffect(() => {
         potId={plantPotId || ""}
         parentPlant={parentPlant === undefined ? undefined : parentPlant} // differentiate between "not set" and "null"
         onClose={() => {
+          cancelPlantForm();
           setPlantFormOpen(false);
           setPlantPotId(null);
           setParentPlant(undefined);

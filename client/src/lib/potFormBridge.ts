@@ -131,3 +131,29 @@ export function resolvePlantForm(data: any) {
   }
 }
 
+//// Cancellers
+
+export function cancelAssignPot() {
+  if (assignPotResolver) {
+    assignPotResolver(null as any); // or a special symbol
+    assignPotResolver = null;
+    pendingQr = null;
+  }
+}
+
+export function cancelPotForm() {
+  if (potFormResolver) {
+    potFormResolver(null);
+    potFormResolver = null;
+    pendingCreateQr = null;
+  }
+}
+
+export function cancelPlantForm() {
+  if (plantFormResolver) {
+    plantFormResolver(null);
+    plantFormResolver = null;
+    pendingPotId = null;
+    pendingParentPlant = null;
+  }
+}
