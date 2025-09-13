@@ -90,7 +90,7 @@ export default function SearchPage() {
               <div className="ml-3 flex-1 min-w-0">
                 <div className="font-medium truncate">{plant.plantName}</div>
                 <div className="text-sm text-gray-500 truncate">
-                  {plant.species}
+                  <i>{plant.species}</i>
                   {plant.potName ? ` • ${plant.potName}` : ""}
                 </div>
               </div>
