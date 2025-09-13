@@ -4,18 +4,9 @@
 
 import type { Plant } from "../types";
 
-// ---------- CHOOSE POT ----------
+// ---------- LISTENERS ----------
 type Listener = (qr: string) => void;
 let listeners: Listener[] = [];
-
-export function createChoosePotActionPromise(qr: string): Promise<"create" | "assign"> {
-  console.log("Creating choose pot action promise");
-  pendingQr = qr;
-  listeners.forEach(fn => fn(qr)); // notify subscribers
-  return new Promise((resolve) => {
-    chooseActionResolver = resolve;
-  });
-}
 
 export function subscribePendingQr(fn: Listener) {
   listeners.push(fn);
@@ -24,31 +15,51 @@ export function subscribePendingQr(fn: Listener) {
   };
 }
 
-export function resolveChoosePotAction(choice: "create" | "assign") {
-  chooseActionResolver?.(choice);
-  chooseActionResolver = null;
+let pendingQr: string | null = null;
+export function subscribePendingPlant(
+  fn: (potId: string, parentPlant?: Partial<Plant> | null) => void
+) {
+  plantListeners.push(fn);
+  return () => {
+    plantListeners = plantListeners.filter(l => l !== fn);
+  };
 }
+
 
 // ---------- CREATE POT ----------
 let potFormResolver: ((data: any) => void) | null = null;
-// @ts-ignore
-let pendingQr: string | null = null;
-let chooseActionResolver: ((choice: "create" | "assign") => void) | null = null;
+let pendingCreateQr: string | null = null;
+let createListeners: ((qr: string) => void)[] = [];
 
 export function createPotFormPromise(qrCode: string): Promise<any> {
-  pendingQr = qrCode;
-  return new Promise((resolve) => {
+  console.log("Creating pot form promise for", qrCode);
+  pendingCreateQr = qrCode;
+  createListeners.forEach(fn => fn(qrCode)); // notify RootLayout
+  return new Promise(resolve => {
     potFormResolver = resolve;
   });
+}
+
+export function subscribePendingCreate(fn: (qr: string) => void) {
+  createListeners.push(fn);
+
+  if (pendingCreateQr) {
+    fn(pendingCreateQr); // replay if already pending
+  }
+
+  return () => {
+    createListeners = createListeners.filter(l => l !== fn);
+  };
 }
 
 export function resolvePotForm(data: any) {
   if (potFormResolver) {
     potFormResolver(data);
     potFormResolver = null;
-    pendingQr = null;
+    pendingCreateQr = null;
   }
 }
+
 
 // ---------- ASSIGN POT ----------
 let assignPotResolver: ((result: number | "create") => void) | null = null;
@@ -115,15 +126,3 @@ export function resolvePlantForm(data: any) {
   }
 }
 
-/**
- * Subscribe to pending plant requests.
- * Returns an unsubscribe function.
- */
-export function subscribePendingPlant(
-  fn: (potId: string, parentPlant?: Partial<Plant> | null) => void
-) {
-  plantListeners.push(fn);
-  return () => {
-    plantListeners = plantListeners.filter(l => l !== fn);
-  };
-}

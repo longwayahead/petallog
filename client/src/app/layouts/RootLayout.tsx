@@ -11,6 +11,7 @@ import {
   resolvePotForm,
   subscribePendingPlant,
   resolvePlantForm,
+  subscribePendingCreate
 } from "../../lib/potFormBridge";
 import {  pauseScanner, resumeScanner } from "../../lib/scannerBridge";
 import type { Plant } from "../../types";
@@ -32,7 +33,16 @@ export default function RootLayout() {
   // const [scannerOpen, setScannerOpen] = useState(false);
   // const [scannerHeading, setScannerHeading] = useState("Scan a pot");
 
-
+// Sub: PotFormModal
+useEffect(() => {
+  const unsub = subscribePendingCreate((qr) => {
+    console.log("RootLayout got pending PotForm for QR:", qr);
+    pauseScanner(); // pause while pot form is open
+    setQrCode(qr);
+    setPotFormOpen(true);
+  });
+  return unsub;
+}, []);
 
   // Sub: AssignPotModal
   useEffect(() => {
