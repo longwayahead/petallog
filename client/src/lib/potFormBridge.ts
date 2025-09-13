@@ -14,7 +14,7 @@ export function subscribePendingQr(fn: Listener) {
     listeners = listeners.filter(l => l !== fn);
   };
 }
-
+// @ts-ignore
 let pendingQr: string | null = null;
 export function subscribePendingPlant(
   fn: (potId: string, parentPlant?: Partial<Plant> | null) => void
