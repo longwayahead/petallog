@@ -29,6 +29,7 @@ export async function scanController(qrCode: string, navigate: (path: string) =>
         const result = await createAssignPotPromise(qrCode);
         if (result === "create") {
             console.log("User chose to create a new pot", qrCode);
+            console.log(qrCode);
             const details = await createPotFormPromise(qrCode);
             console.log("scanController received details", details);
 
