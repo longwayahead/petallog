@@ -18,6 +18,7 @@ type Props = {
 };
 
 
+
 export default function PlantFormModal({
   open,
   potId,
@@ -43,7 +44,7 @@ export default function PlantFormModal({
     parentPlantId: null,
   });
 //   console.log("parent plant", parentPlant);
-
+const [submitting, setSubmitting] = useState(false);
 // console.log(parentPlant);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -94,14 +95,14 @@ export default function PlantFormModal({
         <form
             onSubmit={(e) => {
                 e.preventDefault();
+                setSubmitting(true);
 
-                // Map camelCase -> API expected shape
                 const { foodId, photoFile, ...rest } = form;
                 onSubmit({
                 ...rest,
                 potId,
                 foodId: foodId,
-                photoFile,                 // stays as-is for file handling
+                photoFile, 
                 });
             }}
             className="space-y-4"
@@ -233,10 +234,18 @@ export default function PlantFormModal({
               type="submit"
               className="bg-green-600 text-white px-4 py-2 rounded"
             >
-              {parentPlant ? "Propagate" : "Create Plant"}
+              {submitting ? "Saving..." : parentPlant ? "Propagate" : "Create Plant"}
             </button>
           </div>
         </form>
+        {submitting && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/75 z-50">
+            <div className="flex flex-col items-center gap-2">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              <p className="text-sm text-gray-600">Uploading plant...</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Camera capture overlay */}

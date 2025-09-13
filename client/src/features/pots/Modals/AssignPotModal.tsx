@@ -36,7 +36,7 @@ export default function AssignPotModal({ open, qrCode, onClose, onAssign, onCrea
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
       <div className="bg-white rounded-lg p-6 w-96">
-        <h2 className="text-lg font-bold mb-4">Assign QR to an existing pot</h2>
+        <h2 className="text-lg font-bold mb-4">Assign to old pot or add a new one</h2>
         <p className="text-sm text-gray-500 mb-4">QR: {qrCode}</p>
 
         <ul className="space-y-2 max-h-64 overflow-y-auto">

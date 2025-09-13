@@ -4,40 +4,49 @@
 
 import type { Plant } from "../types";
 
+//
 // ---------- CHOOSE POT ----------
-type Listener = (qr: string) => void;
-let listeners: Listener[] = [];
+//
+type ChooseListener = (qr: string) => void;
+let chooseListeners: ChooseListener[] = [];
+let chooseActionResolver: ((choice: "create" | "assign") => void) | null = null;
+let pendingChooseQr: string | null = null;
 
 export function createChoosePotActionPromise(qr: string): Promise<"create" | "assign"> {
   console.log("Creating choose pot action promise");
-  pendingQr = qr;
-  listeners.forEach(fn => fn(qr)); // notify subscribers
-  return new Promise((resolve) => {
+  pendingChooseQr = qr;
+  chooseListeners.forEach(fn => fn(qr));
+  return new Promise(resolve => {
     chooseActionResolver = resolve;
   });
 }
 
-export function subscribePendingQr(fn: Listener) {
-  listeners.push(fn);
+export function subscribePendingChoose(fn: ChooseListener) {
+  chooseListeners.push(fn);
+  if (pendingChooseQr) {
+    console.log("Replaying pending choose QR:", pendingChooseQr);
+    fn(pendingChooseQr);
+  }
   return () => {
-    listeners = listeners.filter(l => l !== fn);
+    chooseListeners = chooseListeners.filter(l => l !== fn);
   };
 }
 
 export function resolveChoosePotAction(choice: "create" | "assign") {
   chooseActionResolver?.(choice);
   chooseActionResolver = null;
+  pendingChooseQr = null;
 }
 
+//
 // ---------- CREATE POT ----------
+//
 let potFormResolver: ((data: any) => void) | null = null;
-// @ts-ignore
-let pendingQr: string | null = null;
-let chooseActionResolver: ((choice: "create" | "assign") => void) | null = null;
+let pendingCreateQr: string | null = null;
 
 export function createPotFormPromise(qrCode: string): Promise<any> {
-  pendingQr = qrCode;
-  return new Promise((resolve) => {
+  pendingCreateQr = qrCode;
+  return new Promise(resolve => {
     potFormResolver = resolve;
   });
 }
@@ -46,50 +55,67 @@ export function resolvePotForm(data: any) {
   if (potFormResolver) {
     potFormResolver(data);
     potFormResolver = null;
-    pendingQr = null;
+    pendingCreateQr = null;
   }
 }
 
+//
 // ---------- ASSIGN POT ----------
-let assignPotResolver: ((result: number | "create") => void) | null = null;
+//
+type AssignListener = (qr: string) => void;
+let assignListeners: AssignListener[] = [];
+let assignPotResolver: ((result: number | "create" | null) => void) | null = null;
+let pendingAssignQr: string | null = null;
 
-export function createAssignPotPromise(qr: string): Promise<number | "create"> {
+export function createAssignPotPromise(qr: string): Promise<number | "create" | null> {
   console.log("Creating assign pot promise for", qr);
-  pendingQr = qr;
-  listeners.forEach(fn => fn(qr)); // notify subscribers
-  return new Promise((resolve) => {
+  pendingAssignQr = qr;
+  assignListeners.forEach(fn => fn(qr));
+  return new Promise(resolve => {
     assignPotResolver = resolve;
   });
+}
+
+export function subscribePendingAssign(fn: AssignListener) {
+  assignListeners.push(fn);
+  if (pendingAssignQr) {
+    console.log("Replaying pending assign QR:", pendingAssignQr);
+    fn(pendingAssignQr);
+  }
+  return () => {
+    assignListeners = assignListeners.filter(l => l !== fn);
+  };
 }
 
 export function resolveAssignPot(potId: number) {
   console.log("Resolving assign pot with", potId);
   assignPotResolver?.(potId);
   assignPotResolver = null;
-  pendingQr = null;
+  pendingAssignQr = null;
 }
 
 export function resolveAssignPotCreate() {
   console.log("Resolving assign pot with 'create'");
   assignPotResolver?.("create");
   assignPotResolver = null;
-  pendingQr = null;
+  pendingAssignQr = null;
 }
 
-// ---------- PLANT FORM ----------
-let plantFormResolver: ((data: any) => void) | null = null;
-// @ts-ignore
-let pendingPotId: string | null = null;
-// @ts-ignore
-let pendingParentPlant: Partial<Plant> | null = null;
+export function cancelAssignPot() {
+  console.log("Assign pot cancelled");
+  assignPotResolver?.(null);
+  assignPotResolver = null;
+  pendingAssignQr = null;
+}
 
-// IMPORTANT: subscriber now receives *both* potId and parentPlant
+//
+// ---------- PLANT FORM ----------
+//
+let plantFormResolver: ((data: any) => void) | null = null;
+let pendingPotId: string | null = null;
+let pendingParentPlant: Partial<Plant> | null = null;
 let plantListeners: ((potId: string, parentPlant?: Partial<Plant> | null) => void)[] = [];
 
-/**
- * Called by actionController to start a new plant flow.
- * Notifies subscribers (RootLayout/PlantProfilePage) to open PlantFormModal.
- */
 export function createPlantFormPromise(
   potId: string,
   parentPlant?: Partial<Plant> | null
@@ -103,9 +129,6 @@ export function createPlantFormPromise(
   });
 }
 
-/**
- * Called from PlantProfilePage after user submits PlantFormModal.
- */
 export function resolvePlantForm(data: any) {
   if (plantFormResolver) {
     plantFormResolver(data);
@@ -115,14 +138,22 @@ export function resolvePlantForm(data: any) {
   }
 }
 
-/**
- * Subscribe to pending plant requests.
- * Returns an unsubscribe function.
- */
+export function cancelPlantForm() {
+  console.log("Plant form cancelled");
+  plantFormResolver?.(null);
+  plantFormResolver = null;
+  pendingPotId = null;
+  pendingParentPlant = null;
+}
+
 export function subscribePendingPlant(
   fn: (potId: string, parentPlant?: Partial<Plant> | null) => void
 ) {
   plantListeners.push(fn);
+  if (pendingPotId) {
+    console.log("Replaying pending plant form:", pendingPotId);
+    fn(pendingPotId, pendingParentPlant);
+  }
   return () => {
     plantListeners = plantListeners.filter(l => l !== fn);
   };

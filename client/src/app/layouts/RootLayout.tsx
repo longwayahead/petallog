@@ -5,14 +5,16 @@ import AssignPotModal from "../../features/pots/Modals/AssignPotModal";
 import PotFormModal from "../../features/pots/Modals/PotFormModal";
 import PlantFormModal from "../../features/plants/Modals/PlantFormModal";
 import {
-  subscribePendingQr,
+  subscribePendingAssign,
   resolveAssignPot,
   resolveAssignPotCreate,
   resolvePotForm,
   subscribePendingPlant,
   resolvePlantForm,
+  cancelAssignPot,
+  cancelPlantForm
 } from "../../lib/potFormBridge";
-import {  pauseScanner, resumeScanner } from "../../lib/scannerBridge";
+import { pauseScanner, resumeScanner } from "../../lib/scannerBridge";
 import type { Plant } from "../../types";
 
 export default function RootLayout() {
@@ -26,18 +28,12 @@ export default function RootLayout() {
   // 🔹 PlantFormModal
   const [plantFormOpen, setPlantFormOpen] = useState(false);
   const [plantPotId, setPlantPotId] = useState<string | null>(null);
-   const [parentPlant, setParentPlant] = useState<Partial<Plant> | null | undefined>(undefined);
-
-  // 🔹 Global scanner modal
-  // const [scannerOpen, setScannerOpen] = useState(false);
-  // const [scannerHeading, setScannerHeading] = useState("Scan a pot");
-
-
+  const [parentPlant, setParentPlant] = useState<Partial<Plant> | null | undefined>(undefined);
 
   // Sub: AssignPotModal
   useEffect(() => {
-    const unsub = subscribePendingQr((qr) => {
-      console.log("RootLayout got pending QR:", qr);
+    const unsub = subscribePendingAssign((qr) => {
+      console.log("RootLayout got pending Assign QR:", qr);
       pauseScanner(); // 👈 pause camera when modal opens
       setQrCode(qr);
       setAssignOpen(true);
@@ -57,15 +53,6 @@ export default function RootLayout() {
     return unsub;
   }, []);
 
-  // Sub: Scanner (bridge promise → modal)
-  // useEffect(() => {
-  //   // when actionController calls createScannerPromise → open scanner modal
-  //   (createScannerPromise as any)._open = (heading?: string) => {
-  //     // setScannerHeading(heading || "Scan a pot");
-  //     // setScannerOpen(true);
-  //   };
-  // }, []);
-
   return (
     <>
       <Outlet />
@@ -75,6 +62,7 @@ export default function RootLayout() {
         open={assignOpen}
         qrCode={qrCode || ""}
         onClose={() => {
+          cancelAssignPot();
           setAssignOpen(false);
           resumeScanner();
         }}
@@ -112,6 +100,7 @@ export default function RootLayout() {
         potId={plantPotId || ""}
         parentPlant={parentPlant === undefined ? undefined : parentPlant} // differentiate between "not set" and "null"
         onClose={() => {
+          cancelPlantForm();
           setPlantFormOpen(false);
           setPlantPotId(null);
           setParentPlant(undefined);
@@ -126,23 +115,6 @@ export default function RootLayout() {
           resumeScanner();
         }}
       />
-
-      {/* 🔹 Global Scanner Modal */}
-      {/* <ScanScreen
-        open={scannerOpen}
-        heading={scannerHeading}
-        asPage={false}
-        // onClose={() => setScannerOpen(false)}
-        onClose={() => {
-            console.log("RootLayout closing scanner");
-            setScannerOpen(false);
-
-            // If user is *on* /scan, make sure we navigate back
-            if (window.location.pathname === "/scan" && history.state?.usr?.returnTo) {
-              window.history.replaceState(null, "", history.state.usr.returnTo);
-            }
-          }}
-      /> */}
     </>
   );
 }
