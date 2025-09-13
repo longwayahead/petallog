@@ -129,7 +129,7 @@ export default function PlantFormModal({
             </div>
 
             <div className="flex-1">
-              <label className="block text-sm font-medium">Name</label>
+              <label className="block text-sm font-medium">Name*</label>
               <input
                 className="w-full border rounded p-2"
                 value={form.plantName ?? ""}
@@ -144,7 +144,7 @@ export default function PlantFormModal({
           {/* Species (only editable for new plants) */}
           {!parentPlant && (
             <div>
-              <label className="block text-sm font-medium">Species</label>
+              <label className="block text-sm font-medium">Species*</label>
               <input
                 className="w-full border rounded p-2"
                 value={form.species ?? ""}
@@ -158,7 +158,7 @@ export default function PlantFormModal({
           {!parentPlant && (
             <>
               <div>
-                <label className="block text-sm font-medium">Acquired At</label>
+                <label className="block text-sm font-medium">Acquired At*</label>
                 <input
                   type="date"
                   className="w-full border rounded p-2"
@@ -201,7 +201,7 @@ export default function PlantFormModal({
           {/* Food (only if not propagation) */}
           {!parentPlant && (
             <div>
-              <label className="block text-sm font-medium">Food</label>
+              <label className="block text-sm font-medium">Food*</label>
               <select
                 className="w-full border rounded p-2"
                 value={form.foodId ?? ""}

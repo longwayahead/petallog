@@ -85,6 +85,7 @@ export default function RootLayout() {
         onCreateNew={() => {
           resolveAssignPotCreate();
           setAssignOpen(false);
+          setPotFormOpen(true);
         }}
       />
 
