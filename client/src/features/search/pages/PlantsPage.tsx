@@ -45,7 +45,7 @@ export default function SearchPage() {
   });
 
   return (
-    <main className="app-root app-container mx-auto max-w-md bg-white text-gray-800">
+    <main className="app-root app-container mx-auto max-w-md bg-white text-gray-800 flex flex-col h-screen">
   <PageHeader title="Search" showBackButton={false} />
 
   {/* Search bar */}
@@ -62,7 +62,7 @@ export default function SearchPage() {
   </div>
 
   {/* Content area with spinner alignment */}
-  <div className="h-[calc(100vh-60px-56px-145px)] overflow-y-auto">
+  <div className="flex-1 overflow-y-auto">
     {loading ? (
       <div className="flex items-center justify-center h-full">
         <div className="h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
@@ -80,7 +80,10 @@ export default function SearchPage() {
               onClick={() => navigate(`/plants/${plant.plantId}`)}
             >
               <img
-                src={plant.plantPhoto || `https://placehold.co/48x48/ccc/fff?text=${plant.plantName[0]}`}
+                src={
+                  plant.plantPhoto ||
+                  `https://placehold.co/48x48/ccc/fff?text=${plant.plantName[0]}`
+                }
                 alt={plant.plantName}
                 className="w-12 h-12 rounded-full object-cover"
               />
