@@ -1,6 +1,10 @@
 import pool from "../config/db.js";
 import * as QrModel from "./qrcodesModel.js";
 
+function toMysqlDateTime(date) {
+    return new Date(date).toISOString().slice(0, 19).replace("T", " ");
+}
+
 export async function findPotById(id) {
     const [rows] = await pool.query(`SELECT
         p.id as potsId,
@@ -41,26 +45,22 @@ export async function findEmptyPots() {
     return rows;
 }
 
-export async function createPot(req, res, next) {
-    // console.log(req.body);
-    try {
-        const { location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from, qrCode } = req.body;
-        const [result] = await pool.query(`INSERT INTO pots
-            (location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from, status)
-            VALUES (?, ?, ?, ?, ?, ?, 1)
-            `, [location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from]);
-        const potId = result.insertId;
-        
-            const qr = await QrModel.findQrByCode(qrCode);
-            if(!qr) return res.status(400).json({message: "Invalid QR code"});
+export async function createPot(data) {
+    const { location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from, qrCode } = data;
+    const acquiredAt = acquired_at ? toMysqlDateTime(acquired_at) : null;
+    const [result] = await pool.query(
+        `INSERT INTO pots (location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from, status)
+         VALUES (?, ?, ?, ?, ?, ?, 1)`,
+        [location, diameter_cm, height_cm, friendly_name, acquiredAt, acquired_from]
+    );
+    const potId = result.insertId;
 
-            await pool.query(`INSERT INTO qrcodes_pots (qrcodes_id, pots_id) VALUES (?, ?)`, [qr.id, potId]);
+    const qr = await QrModel.findQrByCode(qrCode);
+    if (!qr) throw new Error("Invalid QR code");
 
-            res.status(201).json({ potId });
+    await pool.query(`INSERT INTO qrcodes_pots (qrcodes_id, pots_id) VALUES (?, ?)`, [qr.id, potId]);
 
-    } catch (err) {
-        next (err);
-    }
+    return { potId };
 }
 
 export async function assignQRCodeToPot(qrCode, potId) {
