@@ -7,7 +7,7 @@ export default function PlantSummary({ plant }: { plant: Plant }) {
     <div className="flex items-center space-x-4 mb-4">
       <div className="w-24 h-24 rounded-full bg-green-100 overflow-hidden flex items-center justify-center">
         <img
-          src={plant.plantPhoto || `https://placehold.co/100x100/4ade80/white?text=${plant.plantName.charAt(0)}`}
+          src={plant.plantPhoto || `https://placehold.co/100x100/ccc/fff?text=${plant.plantName[0]}`}
           alt={plant.plantName}
           className="w-full h-full object-cover"
         />
