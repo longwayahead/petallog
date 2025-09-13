@@ -93,7 +93,7 @@ export default function FeedPage() {
               <img
                 src={group.plant.thumb}
                 alt={group.plant.name}
-                className="w-12 h-12 rounded-full object-cover border"
+                className="w-12 h-12 rounded-full object-cover"
               />
               <div>
                 <div className="font-semibold text-lg">{group.plant.name}</div>
