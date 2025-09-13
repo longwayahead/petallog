@@ -42,6 +42,7 @@ export function resolveChoosePotAction(choice: "create" | "assign") {
 // ---------- CREATE POT ----------
 //
 let potFormResolver: ((data: any) => void) | null = null;
+//@ts-ignore
 let pendingCreateQr: string | null = null;
 
 export function createPotFormPromise(qrCode: string): Promise<any> {
