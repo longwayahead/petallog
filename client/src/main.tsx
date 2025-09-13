@@ -1,13 +1,13 @@
-import React from 'react';
+// import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import './index.css';
 import App from './app/App';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <App />
-  </React.StrictMode>
+  // </React.StrictMode>
 );
 
 // keep your SW registration if you added it earlier

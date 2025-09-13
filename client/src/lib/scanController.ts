@@ -1,4 +1,4 @@
-// src/lib/scanEntryFlow.ts
+// src/lib/scanController.ts
 // handles the qr code scanning flow in the main scanner
 
 import { apiValidateQRCode, apiCreatePot, apiAssignQRCodeToPot, apiCreatePlant, apiUploadPhoto } from "./potService";
@@ -28,9 +28,9 @@ export async function scanController(qrCode: string, navigate: (path: string) =>
         //assign to existing pot or make a new pot?
         const result = await createAssignPotPromise(qrCode);
         if (result === "create") {
-            console.log("User chose to create a new pot");
+            console.log("User chose to create a new pot", qrCode);
             const details = await createPotFormPromise(qrCode);
-            console.log("scanEntryFlow received details", details);
+            console.log("scanController received details", details);
 
             const newPot = await apiCreatePot(details);
             console.log("Created pot", newPot);
