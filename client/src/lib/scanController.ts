@@ -60,7 +60,6 @@ export async function scanController(qrCode: string, navigate: (path: string) =>
     if(!details) return; // user cancelled
     const newPlant = await apiCreatePlant({ ...details, potId: potId });
 
-      if (details.photoFile) {
           // 2a. Add a timeline card for the child plant
           const res = await fetch(
         `/api/interactions?plantId=${newPlant.plantId}&actionId=13`,
@@ -71,15 +70,12 @@ export async function scanController(qrCode: string, navigate: (path: string) =>
         }
       );
       if (!res.ok) throw new Error("Failed to create new plant interaction");
-    const newInteraction = await res.json();
-    
-     
-    
+      const newInteraction = await res.json();    
         console.log("New interaction created", newInteraction.interactionID);
-    
-        // 2b. Upload the photo to that new interaction
-    
-        
+
+      if (details.photoFile) {
+
+        // 2b. Upload the photo to that new interaction        
     
         console.log("Uploading photo to interaction", newInteraction.interactionID);
         const uploadedPhoto = await apiUploadPhoto(details.photoFile, newInteraction.interactionID);
