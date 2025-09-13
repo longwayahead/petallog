@@ -62,7 +62,7 @@ export default function SearchPage() {
   </div>
 
   {/* Content area with spinner alignment */}
-  <div className="flex-1 overflow-y-auto">
+  <div className="flex-1 overflow-y-auto pb-14">
     {loading ? (
       <div className="flex items-center justify-center h-full">
         <div className="h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
