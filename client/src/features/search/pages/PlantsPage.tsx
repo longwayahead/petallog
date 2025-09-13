@@ -80,9 +80,9 @@ export default function SearchPage() {
               onClick={() => navigate(`/plants/${plant.plantId}`)}
             >
               <img
-                src={plant.plantPhoto || "/placeholder-plant.jpg"}
+                src={plant.plantPhoto || `https://placehold.co/48x48/ccc/fff?text=${plant.plantName[0]}`}
                 alt={plant.plantName}
-                className="w-12 h-12 rounded-full object-cover border"
+                className="w-12 h-12 rounded-full object-cover"
               />
               <div className="ml-3 flex-1 min-w-0">
                 <div className="font-medium truncate">{plant.plantName}</div>
