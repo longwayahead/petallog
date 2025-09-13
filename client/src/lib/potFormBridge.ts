@@ -29,26 +29,31 @@ export function subscribePendingPlant(
 // ---------- CREATE POT ----------
 let potFormResolver: ((data: any) => void) | null = null;
 let pendingCreateQr: string | null = null;
-let createListeners: ((qr: string) => void)[] = [];
+
+let potListeners: ((qr: string) => void)[] = [];
 
 export function createPotFormPromise(qrCode: string): Promise<any> {
-  console.log("Creating pot form promise for", qrCode);
+  console.log("[Bridge] createPotFormPromise called with", qrCode);
   pendingCreateQr = qrCode;
-  createListeners.forEach(fn => fn(qrCode)); // notify RootLayout
+
+  // notify subscribers immediately
+  potListeners.forEach(fn => fn(qrCode));
+
   return new Promise(resolve => {
     potFormResolver = resolve;
   });
 }
 
 export function subscribePendingCreate(fn: (qr: string) => void) {
-  createListeners.push(fn);
+  potListeners.push(fn);
 
+  // replay if one is already pending
   if (pendingCreateQr) {
-    fn(pendingCreateQr); // replay if already pending
+    fn(pendingCreateQr);
   }
 
   return () => {
-    createListeners = createListeners.filter(l => l !== fn);
+    potListeners = potListeners.filter(l => l !== fn);
   };
 }
 
