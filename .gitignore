@@ -3,6 +3,7 @@ uploads
 .env
 dist
 .vite
+package-lock.json
 
 # Logs
 logs
