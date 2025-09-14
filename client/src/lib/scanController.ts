@@ -5,7 +5,7 @@ import { apiValidateQRCode, apiCreatePot, apiAssignQRCodeToPot, apiCreatePlant, 
 import { createAssignPotPromise, createPotFormPromise, createPlantFormPromise } from "./potFormBridge";
 
 export async function scanController(qrCode: string, navigate: (path: string) => void) {
-  const qr = await apiValidateQRCode(qrCode);
+  let qr = await apiValidateQRCode(qrCode);
 
   console.log("QR result:", qr);
 
@@ -15,11 +15,7 @@ export async function scanController(qrCode: string, navigate: (path: string) =>
     return;
   }
 
-  /// Pot has pot and plant
-  if (qr.plantId) {
-    navigate(`/plants/${qr.plantId}`);
-    return;
-  }
+
 
     let newPotId: string | null = null;
 
@@ -50,12 +46,25 @@ export async function scanController(qrCode: string, navigate: (path: string) =>
             //bind qrCode → potId (insert into qrcodes_pots)
             await apiAssignQRCodeToPot(qrCode, String(result));
 
+            qr = await apiValidateQRCode(qrCode); // refresh qr data
+
+          
+
         } 
     }
 
+  /// Pot has pot and plant
+  if (qr.plantId) {
+    navigate(`/plants/${qr.plantId}`);
+    return;
+  }
+
+    // console.log(qr);
+    
+
   // Case: Pot exists but empty
-  if ((qr.potId && !qr.plantId) || newPotId) {
-    const potId: any = newPotId || qr.potId;
+  if ((qr.potId && !qr.plantId)) {
+    const potId: any = qr.potId;
     const details = await createPlantFormPromise(potId, null);
     if(!details) return; // user cancelled
     const newPlant = await apiCreatePlant({ ...details, potId: potId });
