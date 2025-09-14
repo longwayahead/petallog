@@ -7,6 +7,7 @@ router.get("/empty", potsController.getEmptyPots);
 
 router.get("/:id", potsController.getPotById);
 router.post("/", potsController.createPot);
+router.get("/", potsController.getPots);
 router.post("/assign-qr", potsController.assignQRCodeToPot);
 router.post("/:id/free", potsController.freePot);
 export default router;

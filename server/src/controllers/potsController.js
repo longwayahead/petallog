@@ -24,8 +24,17 @@ export async function getEmptyPots(req, res, next) {
 
 export async function createPot(req, res, next) {
     try {
-        pot = await PotsModel.createPot(req, res, next);
-        return pot;
+        const pot = await PotsModel.createPot(req.body);
+        res.status(201).json(pot);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function getPots(req, res, next) {
+    try {
+        const pots = await PotsModel.findPots();
+        res.status(200).json(pots);
     } catch (error) {
         next(error);
     }

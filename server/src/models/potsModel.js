@@ -1,6 +1,10 @@
 import pool from "../config/db.js";
 import * as QrModel from "./qrcodesModel.js";
 
+function toMysqlDateTime(date) {
+    return new Date(date).toISOString().slice(0, 19).replace("T", " ");
+}
+
 export async function findPotById(id) {
     const [rows] = await pool.query(`SELECT
         p.id as potsId,
@@ -41,26 +45,50 @@ export async function findEmptyPots() {
     return rows;
 }
 
-export async function createPot(req, res, next) {
-    // console.log(req.body);
-    try {
-        const { location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from, qrCode } = req.body;
-        const [result] = await pool.query(`INSERT INTO pots
-            (location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from, status)
-            VALUES (?, ?, ?, ?, ?, ?, 1)
-            `, [location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from]);
-        const potId = result.insertId;
-        
-            const qr = await QrModel.findQrByCode(qrCode);
-            if(!qr) return res.status(400).json({message: "Invalid QR code"});
+export async function findPots() {
+    const [rows] = await pool.query(`SELECT
+        p.id as potsId,
+        p.location as potLocation,
+        p.diameter_cm as potDiameter,
+        p.height_cm as potHeight,
+        p.friendly_name as potFriendlyName,
+        p.acquired_at as potAcquiredAt,
+        p.status as potStatus,
+        ps.name as potStatusName,
+        ps.description as potStatusDescription,
+        pp.plants_id as currentPlantId,
+        pl.friendly_name as currentPlantName,
+        pl.species as currentPlantSpecies,
+        o.thumbnail_url as currentPlantPhoto,
+        pp.started_at as plantStartedAt,
+        p.created_at as potCreatedAt,
+        p.updated_at as potUpdatedAt
+        FROM pots p
+        LEFT JOIN pots_statuses ps ON p.status = ps.id
+        LEFT JOIN plants_pots pp ON p.id = pp.pots_id AND pp.ended_at IS NULL
+        LEFT JOIN plants pl ON pp.plants_id = pl.id
+        LEFT JOIN photos o ON o.id = pl.photo_id
+        ORDER BY p.status ASC, p.friendly_name ASC
+        `);
+    return rows;
+}
 
-            await pool.query(`INSERT INTO qrcodes_pots (qrcodes_id, pots_id) VALUES (?, ?)`, [qr.id, potId]);
+export async function createPot(data) {
+    const { location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from, qrCode } = data;
+    const acquiredAt = acquired_at ? toMysqlDateTime(acquired_at) : null;
+    const [result] = await pool.query(
+        `INSERT INTO pots (location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from, status)
+         VALUES (?, ?, ?, ?, ?, ?, 1)`,
+        [location, diameter_cm, height_cm, friendly_name, acquiredAt, acquired_from]
+    );
+    const potId = result.insertId;
 
-            res.status(201).json({ potId });
+    const qr = await QrModel.findQrByCode(qrCode);
+    if (!qr) throw new Error("Invalid QR code");
 
-    } catch (err) {
-        next (err);
-    }
+    await pool.query(`INSERT INTO qrcodes_pots (qrcodes_id, pots_id) VALUES (?, ?)`, [qr.id, potId]);
+
+    return { potId };
 }
 
 export async function assignQRCodeToPot(qrCode, potId) {

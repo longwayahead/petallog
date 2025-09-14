@@ -12,5 +12,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 // keep your SW registration if you added it earlier
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker
+    .register('/sw.js')
+    .then(() => {
+      // listen for messages from sw
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'NEW_VERSION_AVAILABLE') {
+          // custom event to notify the app
+          window.location.reload();
+        }
+      });
+    })
+    .catch(() => {
+      // optional: handle registration failure
+      console.warn('Service worker registration failed');
+    });
 }

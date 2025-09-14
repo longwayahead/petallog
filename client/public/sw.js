@@ -25,6 +25,12 @@ self.addEventListener('activate', (event) => {
       if (k !== APP_CACHE && k !== RUNTIME_CACHE) return caches.delete(k);
     }));
     await self.clients.claim();
+
+    //tell the client to refresh, so that it uses the new version right away
+    const clientsList = await self.clients.matchAll({type: 'window', includeUncontrolled: true});
+    for (const client of clientsList) {
+      client.postMessage({type: 'NEW_VERSION_AVAILABLE'});
+    }
   })());
 });
 

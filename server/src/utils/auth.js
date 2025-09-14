@@ -14,7 +14,7 @@ export const auth = betterAuth({
     requireEmailVerification: false,
     minPasswordLength: 4,
  }, 
-  trustedOrigins: ["http://localhost:5173", "http://localhost:5000", "https://prix-citations-rotary-mary.trycloudflare.com/"],
+  trustedOrigins: ["http://localhost:5173", "http://localhost:5000", "https://unexpected-cars-shed-quad.trycloudflare.com"],
 
   session: { cookie: true },
 

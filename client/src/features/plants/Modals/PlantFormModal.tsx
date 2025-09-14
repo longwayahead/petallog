@@ -18,7 +18,6 @@ type Props = {
 };
 
 
-
 export default function PlantFormModal({
   open,
   potId,
@@ -44,7 +43,7 @@ export default function PlantFormModal({
     parentPlantId: null,
   });
 //   console.log("parent plant", parentPlant);
-const [submitting, setSubmitting] = useState(false);
+
 // console.log(parentPlant);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -95,14 +94,14 @@ const [submitting, setSubmitting] = useState(false);
         <form
             onSubmit={(e) => {
                 e.preventDefault();
-                setSubmitting(true);
 
+                // Map camelCase -> API expected shape
                 const { foodId, photoFile, ...rest } = form;
                 onSubmit({
                 ...rest,
                 potId,
                 foodId: foodId,
-                photoFile, 
+                photoFile,                 // stays as-is for file handling
                 });
             }}
             className="space-y-4"
@@ -130,7 +129,7 @@ const [submitting, setSubmitting] = useState(false);
             </div>
 
             <div className="flex-1">
-              <label className="block text-sm font-medium">Name*</label>
+              <label className="block text-sm font-medium">Name</label>
               <input
                 className="w-full border rounded p-2"
                 value={form.plantName ?? ""}
@@ -145,7 +144,7 @@ const [submitting, setSubmitting] = useState(false);
           {/* Species (only editable for new plants) */}
           {!parentPlant && (
             <div>
-              <label className="block text-sm font-medium">Species*</label>
+              <label className="block text-sm font-medium">Species</label>
               <input
                 className="w-full border rounded p-2"
                 value={form.species ?? ""}
@@ -159,7 +158,7 @@ const [submitting, setSubmitting] = useState(false);
           {!parentPlant && (
             <>
               <div>
-                <label className="block text-sm font-medium">Acquired At*</label>
+                <label className="block text-sm font-medium">Acquired At</label>
                 <input
                   type="date"
                   className="w-full border rounded p-2"
@@ -202,7 +201,7 @@ const [submitting, setSubmitting] = useState(false);
           {/* Food (only if not propagation) */}
           {!parentPlant && (
             <div>
-              <label className="block text-sm font-medium">Food*</label>
+              <label className="block text-sm font-medium">Food</label>
               <select
                 className="w-full border rounded p-2"
                 value={form.foodId ?? ""}
@@ -234,18 +233,10 @@ const [submitting, setSubmitting] = useState(false);
               type="submit"
               className="bg-green-600 text-white px-4 py-2 rounded"
             >
-              {submitting ? "Saving..." : parentPlant ? "Propagate" : "Create Plant"}
+              {parentPlant ? "Propagate" : "Create Plant"}
             </button>
           </div>
         </form>
-        {submitting && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/75 z-50">
-            <div className="flex flex-col items-center gap-2">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-              <p className="text-sm text-gray-600">Uploading plant...</p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Camera capture overlay */}
