@@ -16,7 +16,7 @@ export async function scanController(qrCode: string, navigate: (path: string) =>
   }
 
 
-
+    // @ts-ignore  
     let newPotId: string | null = null;
 
     // QR has no pot
