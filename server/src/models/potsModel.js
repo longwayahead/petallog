@@ -2,7 +2,11 @@ import pool from "../config/db.js";
 import * as QrModel from "./qrcodesModel.js";
 
 function toMysqlDateTime(date) {
-    return new Date(date).toISOString().slice(0, 19).replace("T", " ");
+  if (!date) return null;
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return null;
+  // MySQL DATETIME format: "YYYY-MM-DD HH:MM:SS"
+  return d.toISOString().slice(0, 19).replace("T", " ");
 }
 
 export async function findPotById(id) {
