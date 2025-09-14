@@ -45,6 +45,34 @@ export async function findEmptyPots() {
     return rows;
 }
 
+export async function findPots() {
+    const [rows] = await pool.query(`SELECT
+        p.id as potsId,
+        p.location as potLocation,
+        p.diameter_cm as potDiameter,
+        p.height_cm as potHeight,
+        p.friendly_name as potFriendlyName,
+        p.acquired_at as potAcquiredAt,
+        p.status as potStatus,
+        ps.name as potStatusName,
+        ps.description as potStatusDescription,
+        pp.plants_id as currentPlantId,
+        pl.friendly_name as currentPlantName,
+        pl.species as currentPlantSpecies,
+        o.thumbnail_url as currentPlantPhoto,
+        pp.started_at as plantStartedAt,
+        p.created_at as potCreatedAt,
+        p.updated_at as potUpdatedAt
+        FROM pots p
+        LEFT JOIN pots_statuses ps ON p.status = ps.id
+        LEFT JOIN plants_pots pp ON p.id = pp.pots_id AND pp.ended_at IS NULL
+        LEFT JOIN plants pl ON pp.plants_id = pl.id
+        LEFT JOIN photos o ON o.id = pl.photo_id
+        ORDER BY p.status ASC, p.friendly_name ASC
+        `);
+    return rows;
+}
+
 export async function createPot(data) {
     const { location, diameter_cm, height_cm, friendly_name, acquired_at, acquired_from, qrCode } = data;
     const acquiredAt = acquired_at ? toMysqlDateTime(acquired_at) : null;

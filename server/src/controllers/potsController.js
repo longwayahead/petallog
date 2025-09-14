@@ -31,6 +31,15 @@ export async function createPot(req, res, next) {
     }
 }
 
+export async function getPots(req, res, next) {
+    try {
+        const pots = await PotsModel.findPots();
+        res.status(200).json(pots);
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function assignQRCodeToPot(req, res, next) {
     try {
         console.log("Assigning QR code to pot", req.body);
