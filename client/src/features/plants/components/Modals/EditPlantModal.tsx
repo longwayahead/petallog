@@ -91,7 +91,7 @@ export default function EditPlantModal({ open, plant, onClose, onSaved }: Props)
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-lg font-bold mb-4">pnt dtls – {plant.plantName}</h2>
+        <h2 className="text-lg font-bold mb-4">plnt dtls – {plant.plantName}</h2>
 
         <form onSubmit={handleSave} className="space-y-4">
           {/* Name */}
