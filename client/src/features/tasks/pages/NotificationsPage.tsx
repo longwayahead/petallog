@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { type Task } from "../../../types";
 import PageHeader from "../../../ui/TopNav";
-import { fuzzyDate, formatDueDate } from "../../../utils/date.ts";
+import { formatDueDate } from "../../../utils/date.ts";
 import {useTasks } from "../../../context/TaskContext.tsx";
 
 import {
