@@ -28,14 +28,20 @@ const loadTasks = async () => {
       return setTasks([]);
     }
     const raw = await res.json();
-    //double mapped in notificationspage too. maybe think about consolidating into mappers.ts?
-    const mapped: Task[] = raw.map((t: any) => ({
-      id: String(t.taskID),
-      plantId: String(t.plantID),
-      actions: t.actions?.map((a: any) => a.actionName) || [],
-      due: t.due_date || new Date().toISOString().slice(0, 10),
-      status: t.statusName.toLowerCase() === "pending" ? "pending" : "done",
-    }));
+    
+    const mapped: Task[] = raw.map((t: any) => {
+      // Always normalise to YYYY-MM-DD
+      const dueRaw = t.taskDueDate ? new Date(t.taskDueDate) : new Date();
+      const due = dueRaw.toISOString().slice(0, 10);
+      console.log("Mapping task", t.taskID, "due", t.taskDueDate, "->", due);
+      return {
+        id: String(t.taskID),
+        plantId: String(t.plantID),
+        actions: t.actions?.map((a: any) => a.actionName) || [],
+        due,
+        status: t.statusName.toLowerCase() === "pending" ? "pending" : "done",
+      };
+    });
 
     setTasks(mapped);
   } catch (e) {
@@ -52,8 +58,11 @@ const loadTasks = async () => {
     const interval = setInterval(loadTasks, 30000);
     return () => clearInterval(interval);
   }, []);
+const today = new Date().toISOString().slice(0, 10);
 
-  const pendingCount = tasks.filter((t) => t.status === "pending").length;
+const pendingCount = tasks.filter(
+  (t) => t.status === "pending" && t.due <= today
+).length;
 
   return (
     <TaskContext.Provider value={{ tasks, pendingCount, refresh: loadTasks }}>
