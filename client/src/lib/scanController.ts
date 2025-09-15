@@ -46,11 +46,12 @@ export async function scanController(qrCode: string, navigate: (path: string) =>
             //bind qrCode → potId (insert into qrcodes_pots)
             await apiAssignQRCodeToPot(qrCode, String(result));
 
-            qr = await apiValidateQRCode(qrCode); // refresh qr data
+            
 
           
 
         } 
+        qr = await apiValidateQRCode(qrCode); // refresh qr data
     }
 
   /// Pot has pot and plant
