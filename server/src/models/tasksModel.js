@@ -4,6 +4,7 @@ export async function getTasks() {
   const [rows] = await pool.query(`
     SELECT 
       t.id AS taskID,
+      t.due_date AS taskDueDate,
       p.id AS plantID,
       p.friendly_name AS plantName,
       o.thumbnail_url as plantPhoto,
@@ -36,7 +37,7 @@ export async function getTasks() {
 
   return rows.map((row) => ({
     ...row,
-    actions: row.actions ? JSON.parse(row.actions) : [], // 🔹 parse here
+    actions: row.actions ? JSON.parse(row.actions) : [],
   }));
 }
 

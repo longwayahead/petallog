@@ -53,8 +53,11 @@ function sortTasks(tasks: Task[], mode: "default" | "plant" | "action") {
   if (mode === "action") {
     return [...tasks].sort((a, b) => a.effectName.localeCompare(b.effectName));
   }
+  // default: sort by taskDueDate
   return [...tasks].sort(
-    (a, b) => new Date(a.due).getTime() - new Date(b.due).getTime()
+    (a, b) =>
+      new Date(a.due).setHours(0, 0, 0, 0) -
+      new Date(b.due).setHours(0, 0, 0, 0)
   );
 }
 
@@ -78,24 +81,25 @@ export default function NotificationsPage() {
         const data = await res.json();
 
         const mapped: Task[] = data.map((t: any) => ({
-          taskID: String(t.taskID),
-          plantId: String(t.plantID),
-          plantName: t.plantName,
-          potCode: t.potCode ?? "",
-          plantPhoto:
-            t.plantPhoto ||
-            `https://placehold.co/100x100/green/white?text=${encodeURIComponent(
-              t.plantName
-            )}`,
-          due: t.due_date || new Date().toISOString().slice(0, 10),
-          dueDate: t.due_date || new Date().toISOString().slice(0, 10),
-          effect: t.effectName?.toLowerCase() || "care",
-          effectName: t.effectName || "Care",
-          status: "pending", // API only returns pending tasks
-          statusName: t.statusName,
-          statusId: t.statusSort ?? 0,
-          completedAt: t.completed_at || null,
-        }));
+  taskID: String(t.taskID),
+  plantId: String(t.plantID),
+  plantName: t.plantName,
+  potCode: t.potCode ?? "",
+  plantPhoto:
+    t.plantPhoto ||
+    `https://placehold.co/100x100/green/white?text=${encodeURIComponent(
+      t.plantName
+    )}`,
+  due: t.taskDueDate,    
+  dueDate: t.taskDueDate,     
+  effect: t.effectName?.toLowerCase() || "care",
+  effectName: t.effectName || "Care",
+  status: "pending",
+  statusName: t.statusName,
+  statusId: t.statusSort ?? 0,
+  completedAt: t.completed_at || null,
+}));
+
 
         setTasks(mapped);
 
