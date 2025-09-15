@@ -1,11 +1,29 @@
-import  type { Plant } from "../../../types";
+import  type { Plant, Photo } from "../../../types";
 
-export default function PlantSummary({ plant }: { plant: Plant }) {
-  // console.log(plant.diedAt);
+export default function PlantSummary({
+  plant,
+  onPhotoClick,
+}: {
+  plant: Plant;
+  onPhotoClick?: (photo: Photo) => void;
+}) {
+  // console.log(plant.plantPhotoMain);
   const diedAt = new Date(plant.diedAt!).toLocaleDateString("en-IE", { month: "short", year: "numeric" });
   return (
     <div className="flex items-center space-x-4 mb-4">
-      <div className="w-24 h-24 rounded-full bg-green-100 overflow-hidden flex items-center justify-center">
+      <div className="w-24 h-24 rounded-full bg-green-100 overflow-hidden flex items-center justify-center"
+      onClick={() => {
+        if (onPhotoClick && plant.plantPhoto) {
+          onPhotoClick({
+            id: "profile-photo",
+            url: plant.plantPhotoMain,
+            thumbnail_url: plant.plantPhoto,
+            created_at: plant.acquiredAt,
+            interaction_id: "profile",
+          });
+        }
+      }}
+      >
         <img
           src={plant.plantPhoto || `https://placehold.co/100x100/ccc/fff?text=${plant.plantName[0]}`}
           alt={plant.plantName}

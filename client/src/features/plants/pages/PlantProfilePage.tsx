@@ -449,7 +449,7 @@ const [scannerHeading, setScannerHeading] = useState("Scan a pot");
 
 const [plantCareFormOpen, setPlantCareFormOpen] = useState(false);
 const [plantDetailsFormOpen, setPlantDetailsFormOpen] = useState(false);
-
+// console.table({plant});
   return (
     <div className="mx-auto max-w-md bg-white text-gray-800">
       <PageHeader
@@ -489,7 +489,12 @@ const [plantDetailsFormOpen, setPlantDetailsFormOpen] = useState(false);
           <div className="p-4"
           ref={topRef}
           >
-            {!loading && !error && plant && <PlantSummary plant={plant} />}
+            {!loading && !error && plant && (
+              <PlantSummary 
+              plant={plant}
+              onPhotoClick={setSelectedPhoto}
+              />
+            )}
 
             {pendingTasks.length > 0 && <PendingTaskBanner tasks={pendingTasks} />}
             {plant?.plantAlive == true && (

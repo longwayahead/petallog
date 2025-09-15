@@ -44,7 +44,8 @@ export async function findPlant(id) {
     t.id as potId,
     t.friendly_name as potName,
     t.location as potLocation,
-    o.thumbnail_url as plantPhoto
+    o.thumbnail_url as plantPhoto,
+    o.url as plantPhotoMain
     FROM plants p
     LEFT JOIN plants_pots pp on p.id = pp.plants_id AND pp.ended_at is null
     LEFT JOIN pots t on pp.pots_id = t.id

@@ -20,6 +20,7 @@ export interface Plant {
   potName: string;
   potLocation: string;
   plantPhoto: string;
+  plantPhotoMain: string;
 
 }
 
