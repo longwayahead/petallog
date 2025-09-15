@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { createPool } from "mysql2/promise";
-
+console.log(process.env.TRUSTED_ORIGINS);
 const trustedOrigins = process.env.TRUSTED_ORIGINS.split(",");
 
 export const auth = betterAuth({
