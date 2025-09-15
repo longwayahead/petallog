@@ -49,7 +49,7 @@ export default function SearchPage() {
   <PageHeader title="Search" showBackButton={false} />
 
   {/* Search bar */}
-  <div className="p-4">
+  <div className="p-1 pr-4 pl-4">
     <div className="relative">
       <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
       <input
