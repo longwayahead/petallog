@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { type Task } from "../../../types";
 import PageHeader from "../../../ui/TopNav";
-import { fuzzyDate } from "../../../utils/date.ts";
+import { fuzzyDate, formatDueDate } from "../../../utils/date.ts";
 import {useTasks } from "../../../context/TaskContext.tsx";
 
 import {
@@ -213,7 +213,7 @@ export default function NotificationsPage() {
         {task.plantName} needs {task.effectName}
       </div>
       <div className="text-xs text-gray-500">
-        {fuzzyDate(new Date(task.due).toISOString())}
+        {formatDueDate(new Date(task.due).toISOString())}
       </div>
     </div>
   </div>
