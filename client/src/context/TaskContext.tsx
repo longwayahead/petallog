@@ -30,10 +30,9 @@ const loadTasks = async () => {
     const raw = await res.json();
     
     const mapped: Task[] = raw.map((t: any) => {
-      // Always normalise to YYYY-MM-DD
       const dueRaw = t.taskDueDate ? new Date(t.taskDueDate) : new Date();
       const due = dueRaw.toISOString().slice(0, 10);
-      console.log("Mapping task", t.taskID, "due", t.taskDueDate, "->", due);
+      // console.log("Mapping task", t.taskID, "due", t.taskDueDate, "->", due);
       return {
         id: String(t.taskID),
         plantId: String(t.plantID),
