@@ -1,13 +1,14 @@
 import cron from "node-cron";
 import pool from "../config/db.js";
+import { log, logError } from "./logger.js";
 
-const LOOKAHEAD_DAYS = 1; // configurable: how many days ahead to create tasks
-const SNOOZE_INTERVAL_DAYS = 1; // configurable: how many days to push snoozed tasks
+const LOOKAHEAD_DAYS = 1; // configurable
+const SNOOZE_INTERVAL_DAYS = 3; // configurable
 
 export async function generateDailyTasks() {
   const connection = await pool.getConnection();
   try {
-    console.log("Running daily plant tasks cron...");
+    log("Running daily plant tasks cron...");
 
     // 1. Get all plant_effect rules
     const [rules] = await connection.query(`
@@ -22,7 +23,6 @@ export async function generateDailyTasks() {
     for (const rule of rules) {
       const { plant_id, effect_id, frequency_days, plant_created_at } = rule;
 
-      // last completed for this plant/effect
       const [[lastCompletion]] = await connection.query(
         `SELECT MAX(completed) AS last_completed
          FROM plants_effects_complete
@@ -62,22 +62,26 @@ export async function generateDailyTasks() {
              VALUES (?, ?, 1, ?, NOW(), NOW())`,
             [plant_id, effect_id, dueDate]
           );
-          console.log(`Task created for plant ${plant_id}, effect ${effect_id}, due ${dueDate.toISOString().slice(0,10)}`);
+          log(`Task created for plant ${plant_id}, effect ${effect_id}, due ${dueDate.toISOString().slice(0,10)}`);
         }
       }
     }
 
     // 4. Reschedule snoozed tasks
-    await connection.query(
+    const [res] = await connection.query(
       `UPDATE tasks
-       SET due_date = DATE_ADD(CURDATE(), INTERVAL ? DAY), updated_at = NOW()
+       SET due_date = DATE_ADD(CURDATE(), INTERVAL ? DAY), updated_at = NOW(), status_id = 1
        WHERE status_id = 3`,
       [SNOOZE_INTERVAL_DAYS]
     );
 
-    console.log("Daily cron finished.");
+    if (res.affectedRows > 0) {
+      log(`Rescheduled ${res.affectedRows} snoozed task(s) by ${SNOOZE_INTERVAL_DAYS} day(s).`);
+    }
+
+    log("Daily cron finished.");
   } catch (err) {
-    console.error("Cron error:", err);
+    logError(err);
   } finally {
     connection.release();
   }
