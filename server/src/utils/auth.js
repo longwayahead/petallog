@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { createPool } from "mysql2/promise";
 
+const trustedOrigins = process.env.TRUSTED_ORIGINS.split(",");
 
 export const auth = betterAuth({
     database: createPool({
@@ -14,7 +15,7 @@ export const auth = betterAuth({
     requireEmailVerification: false,
     minPasswordLength: 4,
  }, 
-  trustedOrigins: ["http://localhost:5173", "http://localhost:5000", "https://petallog.com"],
+  trustedOrigins: trustedOrigins,
 
   session: { cookie: true },
 
