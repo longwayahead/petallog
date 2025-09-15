@@ -19,6 +19,31 @@ export async function getPlant(req, res, next) {
   }
 }
 
+export async function updatePlant(req, res, next) {
+  try {
+    const plantId = req.params.id;
+    const { friendly_name, species, acquired_at, acquired_from, notes, foods_id } = req.body;
+    // console.log(plantId, req.body);
+
+    const updated = await Plants.updatePlant(plantId, {
+      friendly_name,
+      species,
+      acquired_at,
+      acquired_from,
+      notes,
+      foods_id,
+    });
+    if (updated) {
+      const plant = await Plants.findPlant(plantId);
+      res.json(plant);
+    } else {
+      res.status(404).json({ message: "Plant not found" });
+    }
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function getPendingTasks(req, res, next) {
   try {
     const tasks = await Plants.findPendingTasks(req.params.id);

@@ -19,7 +19,7 @@ export default function PlantInfo({
         className="w-full flex items-center justify-between"
         onClick={onToggle}
       >
-        <h3 className="font-semibold">Care Information</h3>
+        <h3 className="font-semibold">Information</h3>
         <i
           className={`fas ${
             open ? "fa-chevron-up" : "fa-chevron-down"

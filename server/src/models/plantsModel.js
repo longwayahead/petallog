@@ -55,6 +55,25 @@ export async function findPlant(id) {
   return rows[0];
 }
 
+export async function updatePlant(
+  plantId,
+  { friendly_name, species, acquired_at, acquired_from, notes, foods_id }
+) {
+  // console.log(plantId, friendly_name, species, acquired_at, acquired_from, notes, foods_id);
+  const [result] = await pool.query(
+    `UPDATE plants SET
+      friendly_name = ?,
+      species = ?,
+      acquired_at = ?,
+      acquired_from = ?,
+      notes = ?,
+      foods_id = ?
+    WHERE id = ?`,
+    [friendly_name, species, acquired_at, acquired_from, notes, foods_id, plantId]
+  );
+  return result.affectedRows > 0;
+}
+
 export async function findPendingTasks(plantId) {
   const [rows] = await pool.query(
     `SELECT 

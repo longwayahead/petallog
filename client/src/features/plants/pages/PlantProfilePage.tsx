@@ -21,6 +21,7 @@ import {createScannerPromise} from "../../../lib/scannerBridge";
 import CameraCaptureOverlay from "../components/CameraCaptureOverlay";
 import PhotoModal from "../components/Modals/PhotoModal";
 import ManagePlantCareModal from "../components/Modals/ManagePlantCareModal";
+import EditPlantModal from "../components/Modals/EditPlantModal";
 import ScanScreen from "../../scanner/pages/ScanScreen";
 import {actionsApi} from "../../../lib/potService"; 
 
@@ -393,7 +394,7 @@ const handleCapture = async (file: File, thumbUrl?:string) => {
           it.id === cameraFor
           ? { 
             ...it,
-            photos: it.photos.filter(p => !p.pending), //drop temp
+            photos: it.photos.filter(p => !p.pending),
           }
           : it
         )
@@ -407,7 +408,7 @@ const handleCapture = async (file: File, thumbUrl?:string) => {
         it.id === cameraFor
           ? {
               ...it,
-              photos: it.photos.filter(p => !p.pending), //drop temp
+              photos: it.photos.filter(p => !p.pending),
             }
           : it
       )
@@ -443,45 +444,11 @@ const handleDeletePhoto = async (photoId: string) => {
   }
 }
 
-// const [potFormOpen, setPotFormOpen] = useState(false);
-// const [qrCode, setQrCode] = useState<string | null>(null);
-// const [assignModalOpen, setAssignModalOpen] = useState(false);
-// const [plantFormOpen, setPlantFormOpen] = useState(false);
-// const [plantPotId, setPlantPotId] = useState<string | null>(null);
-
-
-// useEffect(() => {
-// // The potFormBridge.ts file acts like a shared event bus between actionController and PlantProfilePage.
-// // When actionController needs user input (e.g. create/assign pot), it calls create*Promise(),
-// // which stores the pending QR and notifies subscribers. PlantProfilePage subscribes to these
-// // events and opens the appropriate modal. Once the user submits, resolve*() is called in the
-// // modal, which resolves the original promise back in actionController, continuing the flow.
-
-//   const unsubscribe = subscribePendingQr((qr) => {
-//     // console.log("PlantProfilePage notified of pending QR:", qr);
-//     setQrCode(qr);
-//     setAssignModalOpen(true);
-//   });
-//   return unsubscribe;
-// }, []);
-
-// useEffect(() => {
-//   const unsubscribe = subscribePendingPlant((potId) => {
-//     // console.log("PlantProfilePage notified of pending PlantFormModal for pot:", potId);
-//     setPlantPotId(potId);
-//     setPlantFormOpen(true);
-//   });
-//   return unsubscribe;
-// }, []);
-
-
-
 const [scannerOpen, setScannerOpen] = useState(false);
 const [scannerHeading, setScannerHeading] = useState("Scan a pot");
 
-// console.log("The current potid is ", plant?.potId);
-
 const [plantCareFormOpen, setPlantCareFormOpen] = useState(false);
+const [plantDetailsFormOpen, setPlantDetailsFormOpen] = useState(false);
 
   return (
     <div className="mx-auto max-w-md bg-white text-gray-800">
@@ -497,7 +464,9 @@ const [plantCareFormOpen, setPlantCareFormOpen] = useState(false);
           }
         }
         menuItems={[
-          { label: "mng cr", onClick: () => setPlantCareFormOpen(true) },
+          { label: "plnt dtls", onClick: () => setPlantDetailsFormOpen(true) },
+          { label: "cr prfrncs", onClick: () => setPlantCareFormOpen(true) },
+          
           // { label: "Delete Plant", onClick: () => setConfirmDeleteId(plant?.plantId.toString() ?? null) },
         ]}
       />
@@ -629,63 +598,18 @@ const [plantCareFormOpen, setPlantCareFormOpen] = useState(false);
         }}
         plant={plant || null}
       />
-{/* 
-      <AssignPotModal
-        open={assignModalOpen}
-        qrCode={qrCode || ""}
-        onClose={() => setAssignModalOpen(false)}
-        onAssign={(potId) => {
-          // console.log("User assigned existing pot", potId);
-          resolveAssignPot(potId);
-          setAssignModalOpen(false);
-        }}
-        onCreateNew={() => {
-          // console.log("User chose to create new pot from AssignPotModal");
-          resolveAssignPotCreate();
-          setAssignModalOpen(false);
-          setPotFormOpen(true);
-        }}
-      /> */}
 
-
-      {/* <PotFormModal
-
-        open={potFormOpen}
-        qrCode={qrCode || ""}
-        onClose={() => {
-          // console.log("Closing modal");
-          setPotFormOpen(false);
-          setQrCode(null);
-        }}
-        onSubmit={(data) => {
-        
-            // console.log("promise resolving", data);
-          resolvePotForm?.(data); // just pass details back up
-         
-          // console.log("Submitted pot form:", data);
-          setPotFormOpen(false);
-          setQrCode(null);
-        }}
-      /> */}
-      {/* <PlantFormModal
-        open={plantFormOpen}
-        potId={plantPotId || ""}
-        parentPlant={plant || undefined}
-        onClose={() => {
-          setPlantFormOpen(false);
-          setPlantPotId(null);
-        }}
-        onSubmit={(data) => {
-          resolvePlantForm?.(data);   // resolve back to actionController
-          setPlantFormOpen(false);
-          setPlantPotId(null);
-        }}
-      /> */}
       <ManagePlantCareModal
         open={plantCareFormOpen}
         onClose={() => setPlantCareFormOpen(false)}
         plant={plant}
         onSaved={loadPreferences}
+      />
+      <EditPlantModal
+        open={plantDetailsFormOpen}
+        onClose={() => setPlantDetailsFormOpen(false)}
+        plant={plant}
+        onSaved={loadPlant}
       />
       <ScanScreen
         open={scannerOpen}
