@@ -20,7 +20,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://lighter-ix-ld-heart.trycloudflare.com/", // Replace with your frontend's origin
+    origin: "https://petallog.com", // Replace with your frontend's origin
     methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed HTTP methods
     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
   })
