@@ -1,5 +1,4 @@
 import express from "express";
-import { toNodeHandler } from "better-auth/node";
 
 import cors from "cors";
 import path from "path";
@@ -70,3 +69,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
+
+
+// Start the task scheduler
+import "./cron/taskScheduler.js";
