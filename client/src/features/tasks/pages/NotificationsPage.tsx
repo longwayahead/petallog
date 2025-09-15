@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { type Task } from "../../../types";
 import PageHeader from "../../../ui/TopNav";
 import { fuzzyDate } from "../../../utils/date.ts";
+import {useTasks } from "../../../context/TaskContext.tsx";
+
+import {
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from "react-swipeable-list";
+import "react-swipeable-list/dist/styles.css";
 
 // --- Normalize dates to midnight ---
 function normalize(date: Date) {
@@ -30,7 +39,6 @@ function groupTasksForFeed(tasks: Task[]) {
       const dueDate = normalize(new Date(t.due));
       return (
         (dueDate < today && t.status === "pending") || // overdue
-        t.status === "done" || // completed
         dueDate > weekAhead // future
       );
     }),
@@ -43,15 +51,15 @@ function sortTasks(tasks: Task[], mode: "default" | "plant" | "action") {
     return [...tasks].sort((a, b) => a.plantName.localeCompare(b.plantName));
   }
   if (mode === "action") {
-    return [...tasks].sort((a, b) => a.effect.localeCompare(b.effect));
+    return [...tasks].sort((a, b) => a.effectName.localeCompare(b.effectName));
   }
-  // default: sort by due date asc
   return [...tasks].sort(
     (a, b) => new Date(a.due).getTime() - new Date(b.due).getTime()
   );
 }
 
 export default function NotificationsPage() {
+  const { refresh } = useTasks();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortMode, setSortMode] = useState<"default" | "plant" | "action">(
@@ -73,19 +81,25 @@ export default function NotificationsPage() {
           taskID: String(t.taskID),
           plantId: String(t.plantID),
           plantName: t.plantName,
-          potCode: t.potCode,
+          potCode: t.potCode ?? "",
           plantPhoto:
             t.plantPhoto ||
             `https://placehold.co/100x100/green/white?text=${encodeURIComponent(
               t.plantName
             )}`,
           due: t.due_date || new Date().toISOString().slice(0, 10),
+          dueDate: t.due_date || new Date().toISOString().slice(0, 10),
           effect: t.effectName?.toLowerCase() || "care",
-          status: t.statusName.toLowerCase() === "pending" ? "pending" : "done",
+          effectName: t.effectName || "Care",
+          status: "pending", // API only returns pending tasks
+          statusName: t.statusName,
+          statusId: t.statusSort ?? 0,
           completedAt: t.completed_at || null,
         }));
 
         setTasks(mapped);
+
+
       } catch (err) {
         console.error("Failed to fetch tasks", err);
       } finally {
@@ -105,8 +119,28 @@ export default function NotificationsPage() {
     navigate(`/plants/${task.plantId}`);
   };
 
+  async function snoozeTask(task: Task) {
+    try {
+      const res = await fetch(`/api/tasks/${task.taskID}/snooze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error("Failed to snooze task");
+
+      // Remove from local state so it disappears immediately
+      setTasks((prev) => prev.filter((t) => t.taskID !== task.taskID));
+      refresh();
+    } catch (err) {
+      console.error("Error snoozing task", err);
+    }
+  }
+
   const stanleyLabel = (
-    <>srt by <span style={{ display: "inline-block", transform: "scaleX(-1)" }}>a</span>ctn</>
+    <>
+      srt by{" "}
+      <span style={{ display: "inline-block", transform: "scaleX(-1)" }}>a</span>
+      ctn
+    </>
   );
 
   return (
@@ -121,7 +155,6 @@ export default function NotificationsPage() {
         ]}
       />
 
-      {/* Loading state */}
       {loading ? (
         <div className="flex items-center justify-center h-[calc(100vh-60px-56px)]">
           <div className="h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
@@ -146,44 +179,51 @@ export default function NotificationsPage() {
                     : "Earlier"}
                 </h2>
 
-                <ul className="divide-y divide-gray-200">
+                <SwipeableList>
                   {list.map((task) => (
-                    <li
+                    <SwipeableListItem
                       key={task.taskID}
-                      className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleTap(task)}
+                      trailingActions={ // swipe left
+                        <TrailingActions>
+                          <SwipeAction onClick={() => snoozeTask(task)}>
+                            <div className="flex items-center justify-center h-full bg-yellow-400 text-white font-semibold">
+                              <i className="pr-4 fas fa-clock" />
+                            </div>
+                          </SwipeAction>
+                        </TrailingActions>
+                      }
                     >
-                      {/* Avatar */}
-                      <img
-                        src={task.plantPhoto}
-                        alt={task.plantName}
-                        className="w-12 h-12 rounded-full object-cover border"
-                      />
+<li
+  className="flex items-center justify-between w-full px-4 py-3 cursor-pointer hover:bg-gray-50"
+  onClick={() => handleTap(task)}
+>
+  {/* Left: Avatar + Text */}
+  <div className="flex items-center min-w-0">
+    <img
+      src={task.plantPhoto}
+      alt={task.plantName}
+      className="w-12 h-12 rounded-full object-cover border"
+    />
+    <div className="ml-3 min-w-0 flex-1">
+      <div className="font-medium truncate">
+        {task.plantName} needs {task.effectName}
+      </div>
+      <div className="text-xs text-gray-500">
+        {fuzzyDate(new Date(task.due).toISOString())}
+      </div>
+    </div>
+  </div>
 
-                      {/* Text */}
-                      <div className="ml-3 flex-1 min-w-0">
-                        <div className="font-medium truncate">
-                          {task.plantName} needs {task.effect}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {fuzzyDate(new Date(task.due).toISOString())}
-                        </div>
-                      </div>
+  {/* Right: Chevron */}
+  <i className="fas fa-chevron-right text-gray-400 shrink-0 ml-2" />
+</li>
 
-                      {/* Status */}
-                      {task.status === "pending" ? (
-                        <span className="text-emerald-600 text-xs font-semibold mr-2">
-                          Pending
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 text-xs mr-2">Done</span>
-                      )}
 
-                      {/* Chevron */}
-                      <i className="fas fa-chevron-right text-gray-400" />
-                    </li>
+
+
+                    </SwipeableListItem>
                   ))}
-                </ul>
+                </SwipeableList>
               </section>
             );
           })}
