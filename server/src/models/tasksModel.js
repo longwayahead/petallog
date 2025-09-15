@@ -57,3 +57,8 @@ WHERE t.plants_id = ?
   );
   return result;
 }
+
+export async function snoozeTask(id) {
+  await pool.query("UPDATE tasks SET status = 3 WHERE id = ?", [id]);
+  return { id, status: "snoozed" };
+}

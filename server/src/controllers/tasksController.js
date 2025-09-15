@@ -27,3 +27,13 @@ export async function completeTaskByPlantAction(req, res, next) {
     next(err);
   }
 }
+
+export async function snoozeTask(req, res, next) {
+  try {
+    const id = req.params.id;
+    const result = await Task.snoozeTask(id);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
