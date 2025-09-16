@@ -32,3 +32,10 @@ export async function deleteSubscription(id) {
 export async function deleteByEndpoint(endpoint) {
   return pool.query(`DELETE FROM push_subscriptions WHERE endpoint = ?`, [endpoint]);
 }
+
+export async function getAllSubscriptions() {
+  const [rows] = await pool.query(
+    `SELECT id, endpoint, p256dh, auth FROM push_subscriptions`
+  );
+  return rows;
+}

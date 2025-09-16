@@ -1,5 +1,5 @@
 import webpush from "web-push";
-import pool from "../config/db.js";
+import * as Push from "../models/pushModel.js";
 
 webpush.setVapidDetails(
   "mailto:stanley@petallog.com",
@@ -8,7 +8,7 @@ webpush.setVapidDetails(
 );
 
 /**
- * Send a push notification to a subscription
+ * Low-level: send to a single subscription object
  */
 export async function sendPush(subscription, payload) {
   return webpush.sendNotification(subscription, JSON.stringify(payload));
@@ -18,12 +18,8 @@ export async function sendPush(subscription, payload) {
  * Send notification(s) to one user
  */
 export async function sendPushToUser(userId, payload) {
-  const [subs] = await pool.query(
-    `SELECT id, endpoint, p256dh, auth
-     FROM push_subscriptions
-     WHERE user_id = ?`,
-    [userId]
-  );
+  const subs = await Push.getSubscriptionsByUser(userId);
+  let sentCount = 0;
 
   for (const sub of subs) {
     const subscription = {
@@ -33,24 +29,26 @@ export async function sendPushToUser(userId, payload) {
 
     try {
       await sendPush(subscription, payload);
+      sentCount++;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 410) {
-        await pool.query("DELETE FROM push_subscriptions WHERE id = ?", [sub.id]);
+        // subscription expired
+        await Push.deleteSubscription(sub.id);
       } else {
         console.error("Push error:", err);
       }
     }
   }
-  return subs.length;
+
+  return sentCount;
 }
 
 /**
  * Broadcast to all users
  */
 export async function broadcastPush(payload) {
-  const [subs] = await pool.query(
-    `SELECT id, endpoint, p256dh, auth FROM push_subscriptions`
-  );
+  const subs = await Push.getAllSubscriptions();
+  let sentCount = 0;
 
   for (const sub of subs) {
     const subscription = {
@@ -60,13 +58,15 @@ export async function broadcastPush(payload) {
 
     try {
       await sendPush(subscription, payload);
+      sentCount++;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 410) {
-        await pool.query("DELETE FROM push_subscriptions WHERE id = ?", [sub.id]);
+        await Push.deleteSubscription(sub.id);
       } else {
         console.error("Push error:", err);
       }
     }
   }
-  return subs.length;
+
+  return sentCount;
 }
