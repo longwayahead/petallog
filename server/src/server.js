@@ -11,7 +11,9 @@ import actionsRoutes from "./routes/actions.js";
 import effectsRoutes from "./routes/effects.js";
 import photosRoutes from "./routes/photos.js";
 import potsRoutes from "./routes/pots.js";
+import pushRoutes from "./routes/push.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+
 
 import { auth } from "./utils/auth.js";
 
@@ -40,6 +42,8 @@ app.use("/api/actions", actionsRoutes);
 app.use("/api/effects", effectsRoutes);
 app.use("/api", photosRoutes);
 app.use("/api/pots", potsRoutes);
+
+app.use("/api/push", pushRoutes);
 
 
 app.use("/api/auth", async (req, res) => {

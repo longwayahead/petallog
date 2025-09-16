@@ -5,7 +5,6 @@ import PageHeader from "../../../ui/TopNav";
 export default function SettingsPage() {
   return (
     <main className="app-root app-container mx-auto max-w-md bg-white text-gray-800 pb-16">
-      {/* ✅ Use the shared PageHeader for consistency */}
       <PageHeader title="Settings" showBackButton={false} />
 
       <div className="p-4">
@@ -18,7 +17,11 @@ export default function SettingsPage() {
               Add user
             </Link>
           </li>
-          {/* <li className="py-3"><Link to="/pots/abc/edit" className="text-emerald-700">Edit pot (demo)</Link></li> */}
+          <li className="py-3">
+            <Link to="/settings/notifications" className="text-emerald-700">
+              Enable Notifications
+            </Link>
+          </li>
         </ul>
       </div>
     </main>

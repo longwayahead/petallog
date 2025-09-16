@@ -16,6 +16,7 @@ import LoginPage from "../features/users/pages/LoginPage";
 
 // Plant profile detail
 import PlantProfilePage from "../features/plants/pages/PlantProfilePage";
+import SubscribeToPush from "../features/settings/pages/SubscribeToPush";
 
 function ScanScreenWrapper() {
   const location = useLocation();
@@ -64,6 +65,13 @@ export const router = createBrowserRouter([
             element: (
               <AuthGate>
                 <SettingsPage />
+              </AuthGate>
+            )
+          },
+          { path: "settings/notifications", 
+            element: (
+              <AuthGate>
+                <SubscribeToPush />
               </AuthGate>
             )
           },

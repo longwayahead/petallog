@@ -11,7 +11,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 );
 
 // keep your SW registration if you added it earlier
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+if ('serviceWorker' in navigator) {
   navigator.serviceWorker
     .register('/sw.js')
     .then(() => {

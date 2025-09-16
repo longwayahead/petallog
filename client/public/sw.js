@@ -104,3 +104,24 @@ async function cacheFirstWithLimit(request, cacheName, maxEntries = 60) {
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
+
+// Handle push events
+self.addEventListener("push", (event) => {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || "Plant Reminder";
+  const options = {
+    body: data.body || "Stanley says: \"plnt rqrs attn\" 🦈",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    data: data.url || "/tasks"
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Handle notification clicks
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow(event.notification.data)
+  );
+});
