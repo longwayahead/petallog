@@ -63,3 +63,62 @@ export async function snoozeTask(id) {
   await pool.query("UPDATE tasks SET status_id = 3 WHERE id = ?", [id]);
   return { id, status: "snoozed" };
 }
+
+export async function getPlantEffectRules() {
+  const [rows] = await pool.query(`
+    SELECT pe.plant_id, pe.effect_id, pe.frequency_days, pe.flexible,
+           p.created_at AS plant_created_at
+    FROM plants_effects pe
+    JOIN plants p ON p.id = pe.plant_id
+    WHERE p.alive = 1
+  `);
+  return rows;
+}
+
+export async function getLastCompletion(plantId, effectId) {
+  const [[row]] = await pool.query(
+    `SELECT MAX(completed) AS last_completed
+     FROM plants_effects_complete
+     WHERE plant_id = ? AND effect_id = ?`,
+    [plantId, effectId]
+  );
+  return row?.last_completed;
+}
+
+export async function getLastTask(plantId, effectId) {
+  const [[row]] = await pool.query(
+    `SELECT MAX(due_date) AS last_task
+     FROM tasks
+     WHERE plants_id = ? AND effect_id = ?`,
+    [plantId, effectId]
+  );
+  return row?.last_task;
+}
+
+export async function taskExists(plantId, effectId) {
+  const [[row]] = await pool.query(
+    `SELECT id FROM tasks
+     WHERE plants_id = ? AND effect_id = ? AND status_id = 1
+     LIMIT 1`,
+    [plantId, effectId]
+  );
+  return !!row;
+}
+
+export async function insertTask(plantId, effectId, dueDate) {
+  await pool.query(
+    `INSERT INTO tasks (plants_id, effect_id, status_id, due_date, created_at, updated_at)
+     VALUES (?, ?, 1, ?, NOW(), NOW())`,
+    [plantId, effectId, dueDate]
+  );
+}
+
+export async function rescheduleSnoozedTasks(days) {
+  const [res] = await pool.query(
+    `UPDATE tasks
+     SET due_date = DATE_ADD(CURDATE(), INTERVAL ? DAY), updated_at = NOW(), status_id = 1
+     WHERE status_id = 3`,
+    [days]
+  );
+  return res.affectedRows;
+}

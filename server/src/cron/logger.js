@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-const logDir = path.join(process.cwd(), "cron", "logs");
+const logDir = path.join(process.cwd(), "src", "cron", "logs");
 
 // Ensure logs directory exists
 if (!fs.existsSync(logDir)) {
