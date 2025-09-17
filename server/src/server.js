@@ -77,3 +77,4 @@ app.listen(PORT, "0.0.0.0", () =>
 
 // Start the task scheduler
 import "./cron/taskScheduler.js";
+import "./cron/taskNotifier.js";

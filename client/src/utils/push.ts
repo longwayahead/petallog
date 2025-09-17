@@ -11,6 +11,7 @@ export async function subscribeToPush() {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY),
     });
+    console.log("New subscription:", subscription);
   }
 
   const res = await fetch("/api/push/subscribe", {
@@ -19,6 +20,8 @@ export async function subscribeToPush() {
     body: JSON.stringify({ subscription }),
     credentials: "include",
   });
+
+  console.log("Server response:", res);
 
   if (!res.ok) {
     throw new Error(`Failed to save subscription: ${res.status}`);

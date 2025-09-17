@@ -15,6 +15,7 @@ export default function SubscribeToPush() {
   async function enableNotifications() {
     const ok = await requestPermission();
     if (!ok) return;
+    // console.log(ok);
     try {
       await subscribeToPush();
       setSubscribed(true);

@@ -122,3 +122,12 @@ export async function rescheduleSnoozedTasks(days) {
   );
   return res.affectedRows;
 }
+
+export async function countPendingTasks() {
+  const [rows] = await pool.query(
+    `SELECT COUNT(*) AS count
+     FROM tasks
+     WHERE status_id = 1`
+  );
+  return rows[0].count;
+}
