@@ -60,7 +60,7 @@ export async function updatePlant(
   plantId,
   { friendly_name, species, acquired_at, acquired_from, notes, foods_id }
 ) {
-  console.log(plantId, friendly_name, species, acquired_at, acquired_from, notes, foods_id);
+  // console.log(plantId, friendly_name, species, acquired_at, acquired_from, notes, foods_id);
   const [result] = await pool.query(
     `UPDATE plants SET
       friendly_name = ?,
@@ -207,7 +207,7 @@ export async function assignPlantPot(plantId, potId) {
     const newRowId = assign[0].insertId;
     if(assign[0].affectedRows > 0) {
         const pot = await pool.query(`UPDATE pots SET status = 2 WHERE id = ?`, [potId]); //set status to occupied
-        console.log(pot);
+        // console.log(pot);
         return pot[0];
     }
     return null;
@@ -217,7 +217,7 @@ export async function createPlant({ plantName, species, acquiredAt, acquiredFrom
   const conn = await pool.getConnection();
   try{
     await conn.beginTransaction();
-    console.log(plantName, species, acquiredAt, acquiredFrom, plantNotes, foodId, photoId, potId);
+    // console.log(plantName, species, acquiredAt, acquiredFrom, plantNotes, foodId, photoId, potId);
 
     const plantRes = await conn.query(
       `INSERT INTO plants (friendly_name, species, acquired_at, acquired_from, notes, foods_id, photo_id) 

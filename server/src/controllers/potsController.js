@@ -42,10 +42,10 @@ export async function getPots(req, res, next) {
 
 export async function assignQRCodeToPot(req, res, next) {
     try {
-        console.log("Assigning QR code to pot", req.body);
+        // console.log("Assigning QR code to pot", req.body);
         const { qrCode, potId } = req.body;
         const result = await PotsModel.assignQRCodeToPot(qrCode, potId);
-        console.log(result);
+        // console.log(result);
         if (result) {
             res.status(200).json({ message: "QR code successfully assigned to pot" });
         } else {

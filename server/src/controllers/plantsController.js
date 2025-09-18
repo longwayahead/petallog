@@ -109,7 +109,7 @@ export async function assignPlantPot(req, res, next) {
     try{
         const plantId = req.params.plantId;
         const { potId } = req.body;
-        console.log(plantId, potId);
+        // console.log(plantId, potId);
         const result = await Plants.assignPlantPot(plantId, potId);
         if(result) {
           const plant = await Plants.findPlant(plantId);
