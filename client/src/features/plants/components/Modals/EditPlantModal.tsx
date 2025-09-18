@@ -168,6 +168,7 @@ export default function EditPlantModal({ open, plant, onClose, onSaved }: Props)
               <option value="">-- Select food --</option>
               <option value={1}>Liquid Fertiliser</option>
               <option value={2}>Solid Food</option>
+              <option value={3}>Succulent</option>
             </select>
           </div>
 
