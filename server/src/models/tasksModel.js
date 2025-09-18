@@ -32,6 +32,8 @@ export async function getTasks() {
     LEFT JOIN actions_effects ae ON ae.effects_id = e.id
     LEFT JOIN actions a ON a.id = ae.actions_id
     WHERE t.status_id = 1
+    AND t.due_date <= CURDATE()
+    AND p.alive = 1
     GROUP BY t.id, p.id, ts.id, e.id
   `);
 
