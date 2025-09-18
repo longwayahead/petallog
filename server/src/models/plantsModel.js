@@ -60,7 +60,7 @@ export async function updatePlant(
   plantId,
   { friendly_name, species, acquired_at, acquired_from, notes, foods_id }
 ) {
-  // console.log(plantId, friendly_name, species, acquired_at, acquired_from, notes, foods_id);
+  console.log(plantId, friendly_name, species, acquired_at, acquired_from, notes, foods_id);
   const [result] = await pool.query(
     `UPDATE plants SET
       friendly_name = ?,
@@ -88,7 +88,7 @@ export async function findPendingTasks(plantId) {
 FROM tasks t
 LEFT JOIN tasks_statuses ts ON ts.id = t.status_id
 LEFT JOIN effects e ON e.id = t.effect_id
-WHERE t.plants_id = ? AND t.status_id = 1
+WHERE t.plants_id = ? AND t.status_id = 1 and t.due_date <= CURDATE() and p.alive = 1
 ORDER BY t.due_date ASC, e.name ASC
     `,
     [plantId]
