@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.4.1",
     "@fontsource/inter": "^5.2.6",
     "@shivantra/react-web-camera": "^1.0.0",
     "@yudiel/react-qr-scanner": "^2.3.1",

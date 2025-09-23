@@ -1,16 +1,22 @@
 // src/utils/date.ts
 import { formatDistanceToNow } from "date-fns";
+import { TZDate } from "@date-fns/tz";
 
 export function fuzzyDate(dateString: string): string {
-  const d = new Date(dateString);
-  // console.log("fuzzyDate input:", dateString, "parsed:", d);
-  return formatDistanceToNow(new Date(d.getTime() - 5000), { addSuffix: true });
+  // Create a TZDate in Dublin time
+  const d = new TZDate(dateString, "Europe/Dublin");
+  // possibly adjust a little buffer if needed (-5000 ms)
+  const d2 = new Date(d.getTime() - 5000);
+  return formatDistanceToNow(d2, { addSuffix: true });
 }
 
-export function formatDueDate(dueDate: string): string {
-   const today = new Date();
-  today.setHours(0, 0, 0, 0); // normalize to midnight
-  const date = new Date(dueDate);
+export function formatDueDate(dueDateString: string): string {
+  // Make sure to treat dueDate in Dublin time
+  const today = new TZDate(new Date(), "Europe/Dublin");
+  // Normalize both to midnight Dublin time
+  today.setHours(0, 0, 0, 0);
+
+  const date = new TZDate(dueDateString, "Europe/Dublin");
   date.setHours(0, 0, 0, 0);
 
   const diffMs = date.getTime() - today.getTime();
