@@ -53,10 +53,17 @@ export async function generateDailyTasks(req, res, next) {
       const lastCompleted = await Task.getLastCompletion(plant_id, effect_id);
       const lastTask = await Task.getLastTask(plant_id, effect_id);
 
-      const baseline = lastCompleted || plant_created_at;
-      const lastDue = lastTask || baseline;
+      let baseline = plant_created_at;
 
-      const dueDate = new Date(lastDue);
+      if (lastCompleted && new Date(lastCompleted) > new Date(baseline)) {
+        baseline = lastCompleted;
+      }
+
+      if (lastTask && new Date(lastTask) > new Date(baseline)) {
+        baseline = lastTask;
+      }
+
+      const dueDate = new Date(baseline);
       dueDate.setDate(dueDate.getDate() + frequency_days);
 
       const today = new Date();
