@@ -168,7 +168,7 @@ export default function NotificationsPage() {
           All the plants are snug 🦈
         </div>
       ) : (
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-200 pb-16">
           {(["today", "thisWeek", "earlier"] as const).map((section) => {
             const list = groups[section];
             if (!list.length) return null;
